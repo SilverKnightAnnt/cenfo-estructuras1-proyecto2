@@ -16,6 +16,7 @@
 
 #include "Baraja.h"
 #include "Mano.h"
+#include "Campo.h"
 #include <string>
 
 using namespace std;
@@ -26,6 +27,7 @@ private:
     int vida;
     Baraja baraja;
     Mano mano;
+    Campo campo;
 public:
     Jugador();
     void setAlias(string);
@@ -36,6 +38,8 @@ public:
     Baraja getBaraja();
     void setMano(Mano);
     Mano getMano();
+    void setCampo(Campo);
+    Campo getCampo();
     string imprimirJugador();
 };
 

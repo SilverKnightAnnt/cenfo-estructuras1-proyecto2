@@ -25,6 +25,7 @@ private:
 public:
     Campo();
     void colocarCarta(Carta,int);
+    Carta verDetalleCarta(Carta);
     string imprimirCampo();
 };
 

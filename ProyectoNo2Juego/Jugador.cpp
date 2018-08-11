@@ -43,6 +43,14 @@ Mano Jugador::getMano(){
     return mano;
 }
 
+void Jugador::setCampo(Campo pCampo){
+    campo = pCampo;
+}
+
+Campo Jugador::getCampo(){
+    return campo;
+}
+
 string imprimirJugador(){
     
 }

@@ -27,7 +27,12 @@ void procesarOpcionMenu(int*);
 void iniciarJuego();
 void generarBarajaJugador(Jugador*);
 void generarManoJugador(Jugador*);
+void menuJugador();
+void procesarOpcionMenuJugador(int*);
 void verMano();
+void colocarCartaEnCampo();
+void verCampo();
+void verDetalleCarta();
 
 int main(int argc, char** argv) {
     cout << "¡Bienvenido a ************!";
@@ -39,7 +44,7 @@ void mostrarMenu() {
     int opcionMenu = -1;
     do {
         cout << "\n\nMenú principal"
-                "\n1. Iniciar juego.\n2. Ver mano.\n3. Salir.\n\nSeleccione su opción: ";
+                "\n1. Iniciar juego.\n2. Ranking.\n3. Salir.\n\nSeleccione su opción: ";
         cin >> opcionMenu;
         procesarOpcionMenu(&opcionMenu);
     } while (opcionMenu != 3);
@@ -51,7 +56,8 @@ void procesarOpcionMenu(int* pOpcion) {
             iniciarJuego();
             break;
         case 2:
-            verMano();
+            break;
+        case 3:
             break;
         default:
             cout << "Opción incorrecta.";
@@ -75,6 +81,8 @@ void iniciarJuego() {
     jugador2.setVida(10);
     generarBarajaJugador(&jugador2);
     generarManoJugador(&jugador2);
+    cout << "\n¡DUELO!";
+    menuJugador();
 }
 
 void generarBarajaJugador(Jugador* pJugador) {
@@ -109,18 +117,117 @@ void generarManoJugador(Jugador* pJugador) {
     }
 }
 
-void verMano(){
-    string alias;
-    Jugador j;
-    cout << "Ingrese el alias del jugador para ver la mano: ";
-    cin >> alias;
-    j.setAlias(alias);
-    if(jugador1.getAlias() == alias){
-        cout << jugador1.getMano().imprimirMano();
-        cout << "\n\n" << jugador1.getBaraja().imprimirBaraja();
-    }else if (jugador2.getAlias() == alias){
-        cout << jugador2.getMano().imprimirMano();
-         cout << "\n\n" << jugador2.getBaraja().imprimirBaraja();
+void menuJugador() {
+    int opcionMenuJugador = -1;
+    do {
+        cout << "\n\nMenú del jugador"
+                "\n1. Ver mano.\n2. Colocar carta.\n3. Ver campo."
+                "\n4. Ver detalle de carta en campo.\n5. Atacar."
+                "\n6. Terminar turno.\n\nSeleccione su opción: ";
+        cin >> opcionMenuJugador;
+        procesarOpcionMenuJugador(&opcionMenuJugador);
+    } while (opcionMenuJugador != 7);
+}
+
+void procesarOpcionMenuJugador(int* pOpcionMenuJugador) {
+    switch (*pOpcionMenuJugador) {
+        case 1:
+            verMano();
+            break;
+        case 2:
+            colocarCartaEnCampo();
+            break;
+        case 3:
+            verCampo();
+            break;
+        case 4:
+            verDetalleCarta();
+            break;
+        case 5:
+
+            break;
+        case 6:
+
+            break;
+        default:
+            cout << "Opción incorrecta.";
     }
 }
 
+void verMano() {
+    string alias;
+    Jugador j;
+    cout << "\nIngrese el alias del jugador para ver la mano: ";
+    cin >> alias;
+    j.setAlias(alias);
+    if (jugador1.getAlias() == alias) {
+        cout << jugador1.getMano().imprimirMano();
+    } else if (jugador2.getAlias() == alias) {
+        cout << jugador2.getMano().imprimirMano();
+    }
+}
+
+void colocarCartaEnCampo() {
+    verMano();
+    string alias;
+    int iden, espacio;
+    Jugador j;
+    Carta c;
+    Campo cp;
+    cout << "\n\nIngrese el alias del jugador para colocar: ";
+    cin >> alias;
+    j.setAlias(alias);
+    cout << "Ingrese el identificador de la carta que desea invocar: ";
+    cin >> iden;
+    c.setIdentificador(iden);
+    if (jugador1.getAlias() == alias) {
+        NodoCartas* cartaBuscar = jugador1.getMano().getListaCartas().buscarCartaPorIdentificador(c);
+        if (cartaBuscar != NULL) {
+            c = cartaBuscar->getCarta();
+            cout << "Digite el espacio al cual la quiere agregar (1-5): ";
+            cin >> espacio;
+            espacio--;
+            cp = jugador1.getCampo();
+            cp.colocarCarta(c, espacio);
+            jugador1.setCampo(cp);
+        }
+    } else if (jugador2.getAlias() == alias) {
+        NodoCartas* cartaBuscar = jugador2.getMano().getListaCartas().buscarCartaPorIdentificador(c);
+        if (cartaBuscar != NULL) {
+            c = cartaBuscar->getCarta();
+            cout << "Digite el espacio al cual la quiere agregar (1-5): ";
+            cin >> espacio;
+            espacio--;
+            cp = jugador2.getCampo();
+            cp.colocarCarta(c, espacio);
+            jugador2.setCampo(cp);
+        }
+    }
+}
+
+void verCampo(){
+    cout << jugador2.getCampo().imprimirCampo();
+    cout << "\n---------------------------------------------------------";
+    cout << "\n" << jugador1.getCampo().imprimirCampo();
+}
+
+void verDetalleCarta(){
+    verCampo();
+    string alias;
+    int iden;
+    Jugador j;
+    Carta c;
+    cout << "\n\nIngrese el alias del jugador para ver detalle: ";
+    cin >> alias;
+    j.setAlias(alias);
+    cout << "Ingrese el identificador de la carta que desea ver: ";
+    cin >> iden;
+    c.setIdentificador(iden);
+    cout << "\n***********************************************************";
+    if (jugador1.getAlias() == alias) {
+        cout << jugador1.getCampo().verDetalleCarta(c).imprimirCarta(); 
+    } else if (jugador2.getAlias() == alias) {
+        cout << jugador2.getCampo().verDetalleCarta(c).imprimirCarta();   
+    }
+    cout << "\n***********************************************************";
+}

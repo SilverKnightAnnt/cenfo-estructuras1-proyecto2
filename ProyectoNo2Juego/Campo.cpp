@@ -16,10 +16,18 @@ void Campo::colocarCarta(Carta pCarta, int posicion) {
     cartas[posicion] = pCarta;
 }
 
+Carta Campo::verDetalleCarta(Carta pCarta){
+    for(int i = 0;i < 5;i++){
+        if(cartas[i].getIdentificador() == pCarta.getIdentificador()){
+            return cartas[i];
+        }
+    }
+}
+
 string Campo::imprimirCampo() {
     stringstream impresion;
     for (int i = 0 ; i < 5; i++) {
-        impresion << "\n" << i << " | Identificador: " << cartas[i].getIdentificador() << " | Ataque: " << cartas[i].getAtaque() << " | Defensa: " << cartas[i].getDefensa();
+        impresion << "    | " << cartas[i].getIdentificador() << " |  ";
     }
     return impresion.str();
 }
