@@ -46,6 +46,7 @@ void initJugador(Jugador*, int, int);
 void declararGanador();
 void atacar();
 void mostrarPuntajes();
+void limpiar(Jugador*, Jugador*);
 
 int main(int argc, char** argv) {
     cout << "¡Bienvenido a ************!";
@@ -85,10 +86,19 @@ Jugador jugador2;
 Puntuacion nuevoPuntaje;
 
 void iniciarJuego() {
+    limpiar(&jugador1, &jugador2);
     initJugador(&jugador1, 1, 10);
     initJugador(&jugador2, 2, 10);
     cout << "\n¡DUELO!";
     menuJugador();
+}
+
+void limpiar(Jugador* pJ1, Jugador* pJ2) {
+    Baraja b;
+    Mano m;
+    Campo c;
+    *pJ1 = Jugador("", 0, b, m, c);
+    *pJ2 = Jugador("", 0, b, m, c);
 }
 
 void generarBarajaJugador(Jugador* pJugador) {
