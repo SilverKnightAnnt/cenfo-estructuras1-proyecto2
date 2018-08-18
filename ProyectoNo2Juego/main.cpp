@@ -119,9 +119,9 @@ void generarManoJugador(Jugador* pJugador) {
 void menuJugador() {
     int opcionMenuJugador = -1;
     do {
-        cout << "\n\n***********************\nInicia el turno del jugador "
+        cout << "\n\n---------------------------------------------\nInicia el turno del jugador "
                 << turnos.getFrente()->getInfo()->getAlias() <<
-                "\n***********************";
+                "\n---------------------------------------------";
         cout << "\n\nMen\u00fa del jugador"
                 "\n1. Ver mano.\n2. Colocar carta.\n3. Ver campo."
                 "\n4. Ver detalle de carta en campo.\n5. Atacar."
@@ -194,11 +194,12 @@ void verDetalleCarta() {
     verCampo();
     int iden;
     Carta c;
+    Campo cmp = mostrarCartasJugador()->getCampo();
     cout << "\nIngrese el identificador de la carta que desea ver: ";
     cin >> iden;
     c.setIdentificador(iden);
     cout << "\n***********************************************************";
-    cout << mostrarCartasJugador()->getCampo().verDetalleCarta(c).imprimirCarta();
+    cout << cmp.verDetalleCarta(c).imprimirCarta();
     cout << "\n***********************************************************";
 }
 
@@ -222,7 +223,7 @@ Jugador* obtenerJugadorSiguiente() {
 
 Jugador* mostrarCartasJugador() {
     int opcion;
-    cout << "\n1. Ver el detalle de tus cartas"
+    cout << "\n\n1. Ver el detalle de tus cartas"
             "\n2. Ver el detalle de las cartas enemigas"
             "\n\nSeleccione su opci\u00f3n: ";
     cin >> opcion;
