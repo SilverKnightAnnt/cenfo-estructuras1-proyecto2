@@ -86,6 +86,9 @@ Jugador jugador1;
 Jugador jugador2;
 Puntuacion nuevoPuntaje;
 bool gane;
+bool enableSummon = true;
+bool enableAtack = true;
+int conteoTurnos = 1;
 
 void iniciarJuego() {
     limpiar(&jugador1, &jugador2);
@@ -186,26 +189,29 @@ void verMano() {
 }
 
 void colocarCartaEnCampo() {
-    verMano();
-    int iden, espacio;
-    Carta c;
-    Campo cp;
-    Mano m;
-    cout << "\nIngrese el identificador de la carta que desea invocar: ";
-    cin >> iden;
-    c.setIdentificador(iden);
-    NodoCartas* cartaBuscar = obtenerJugadorActual()->getMano().getListaCartas().buscarCartaPorIdentificador(c);
-    if (cartaBuscar != NULL) {
-        c = cartaBuscar->getCarta();
-        cout << "Digite el espacio al cual la quiere agregar (1-5): ";
-        cin >> espacio;
-        espacio--;
-        cp = obtenerJugadorActual()->getCampo();
-        cp.colocarCarta(c, espacio);
-        obtenerJugadorActual()->setCampo(cp);
-        m = obtenerJugadorActual()->getMano();
-        m.eliminarCartaDeMano(c);
-        obtenerJugadorActual()->setMano(m);
+    if (enableSummon == true) {
+        verMano();
+        int iden, espacio;
+        Carta c;
+        Campo cp;
+        Mano m;
+        cout << "\nIngrese el identificador de la carta que desea invocar: ";
+        cin >> iden;
+        c.setIdentificador(iden);
+        NodoCartas* cartaBuscar = obtenerJugadorActual()->getMano().getListaCartas().buscarCartaPorIdentificador(c);
+        if (cartaBuscar != NULL) {
+            c = cartaBuscar->getCarta();
+            cout << "Digite el espacio al cual la quiere agregar (1-5): ";
+            cin >> espacio;
+            espacio--;
+            cp = obtenerJugadorActual()->getCampo();
+            cp.colocarCarta(c, espacio);
+            obtenerJugadorActual()->setCampo(cp);
+            m = obtenerJugadorActual()->getMano();
+            m.eliminarCartaDeMano(c);
+            obtenerJugadorActual()->setMano(m);
+        }
+        enableSummon = false;
     }
 }
 
@@ -235,6 +241,9 @@ void terminarTurno() {
             << turnos.getFrente()->getInfo()->getAlias();
     turnos.terminarTurno();
     obtenerCarta(turnos.getFrente()->getInfo());
+    enableSummon = true;
+    enableAtack = true;
+    conteoTurnos++;
 }
 
 void obtenerCarta(Jugador* pJugador) {
@@ -323,36 +332,39 @@ void mostrarPuntajes() {
 }
 
 void atacar() {
-    int iden, iden2;
-    Carta c1, c2;
-    verCampo();
-    cout << "\n\nIngrese el identificador de la carta atacante: ";
-    cin >> iden;
-    c1.setIdentificador(iden);
-    c1 = obtenerJugadorActual()->getCampo().verDetalleCarta(c1);
-    cout << "Ingrese el identificador de la carta a atacar: ";
-    cin >> iden2;
-    c2.setIdentificador(iden2);
-    c2 = obtenerJugadorSiguiente()->getCampo().verDetalleCarta(c2);
-    if (c1.getAtaque() > c2.getDefensa()) {
-        int dif = c1.getAtaque() - c2.getDefensa();
-        obtenerJugadorSiguiente()->setVida((obtenerJugadorSiguiente()->getVida() - dif));
-        Campo cp = obtenerJugadorSiguiente()->getCampo();
-        cp.eliminarCarta(c2);
-        obtenerJugadorSiguiente()->setCampo(cp);
-    } else if (c1.getAtaque() == c2.getDefensa()) {
-        Campo cp1 = obtenerJugadorActual()->getCampo();
-        Campo cp2 = obtenerJugadorSiguiente()->getCampo();
-        cp1.eliminarCarta(c1);
-        cp2.eliminarCarta(c2);
-        obtenerJugadorActual()->setCampo(cp1);
-        obtenerJugadorSiguiente()->setCampo(cp2);
-    } else if (c1.getAtaque() < c2.getDefensa()) {
-        int dif = c2.getDefensa() - c1.getAtaque();
-        obtenerJugadorActual()->setVida((obtenerJugadorActual()->getVida() - dif));
-        Campo cp = obtenerJugadorActual()->getCampo();
-        cp.eliminarCarta(c1);
-        obtenerJugadorActual()->setCampo(cp);
+    if (conteoTurnos != 1 && enableAtack == true) {
+        int iden, iden2;
+        Carta c1, c2;
+        verCampo();
+        cout << "\n\nIngrese el identificador de la carta atacante: ";
+        cin >> iden;
+        c1.setIdentificador(iden);
+        c1 = obtenerJugadorActual()->getCampo().verDetalleCarta(c1);
+        cout << "Ingrese el identificador de la carta a atacar: ";
+        cin >> iden2;
+        c2.setIdentificador(iden2);
+        c2 = obtenerJugadorSiguiente()->getCampo().verDetalleCarta(c2);
+        if (c1.getAtaque() > c2.getDefensa()) {
+            int dif = c1.getAtaque() - c2.getDefensa();
+            obtenerJugadorSiguiente()->setVida((obtenerJugadorSiguiente()->getVida() - dif));
+            Campo cp = obtenerJugadorSiguiente()->getCampo();
+            cp.eliminarCarta(c2);
+            obtenerJugadorSiguiente()->setCampo(cp);
+        } else if (c1.getAtaque() == c2.getDefensa()) {
+            Campo cp1 = obtenerJugadorActual()->getCampo();
+            Campo cp2 = obtenerJugadorSiguiente()->getCampo();
+            cp1.eliminarCarta(c1);
+            cp2.eliminarCarta(c2);
+            obtenerJugadorActual()->setCampo(cp1);
+            obtenerJugadorSiguiente()->setCampo(cp2);
+        } else if (c1.getAtaque() < c2.getDefensa()) {
+            int dif = c2.getDefensa() - c1.getAtaque();
+            obtenerJugadorActual()->setVida((obtenerJugadorActual()->getVida() - dif));
+            Campo cp = obtenerJugadorActual()->getCampo();
+            cp.eliminarCarta(c1);
+            obtenerJugadorActual()->setCampo(cp);
+        }
+        enableAtack = false;
+        declararGanador();
     }
-    declararGanador();
 }
