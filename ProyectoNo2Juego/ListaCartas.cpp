@@ -75,3 +75,21 @@ NodoCartas* ListaCartas::buscarCartaPorIdentificador(Carta pCarta){
         }
     }
 }
+
+void ListaCartas::eliminarCarta(Carta pCartaEliminar) {
+    if (listaVacia()) {
+    } else {
+        if (getCabeza()->getCarta().getIdentificador() == pCartaEliminar.getIdentificador()) {
+            setCabeza(getCabeza()->getSiguiente());    
+        } else {
+            NodoCartas* aux = getCabeza();
+            while (aux != NULL && aux->getSiguiente() != NULL && aux->getSiguiente()->getCarta().getIdentificador() !=
+                    pCartaEliminar.getIdentificador()) {
+                aux = aux->getSiguiente();
+            }
+            if (aux != NULL && aux->getSiguiente() != NULL) {
+                aux->setSiguiente(aux->getSiguiente()->getSiguiente());
+            }
+        }
+    }
+}

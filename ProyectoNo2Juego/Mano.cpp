@@ -18,6 +18,10 @@ ListaCartas Mano::getListaCartas(){
     return listaCartas;
 }
 
+void Mano::eliminarCartaDeMano(Carta pCarta){
+    listaCartas.eliminarCarta(pCarta);
+}
+
 string Mano::imprimirMano(){
     return listaCartas.verListaCartas();
 }

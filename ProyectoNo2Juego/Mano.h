@@ -26,6 +26,7 @@ public:
     Mano();
     void setListaCartas(ListaCartas);
     ListaCartas getListaCartas();
+    void eliminarCartaDeMano(Carta);
     string imprimirMano();
 };
 

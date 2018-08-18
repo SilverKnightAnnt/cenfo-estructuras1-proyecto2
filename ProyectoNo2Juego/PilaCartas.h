@@ -22,7 +22,7 @@ using namespace std;
 class PilaCartas {
 private:
     NodoCartas* tope;
-    int longitud;
+    int longitud = 0;
     bool pilaVacia();
 public:
     Baraja();

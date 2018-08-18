@@ -47,6 +47,7 @@ void declararGanador();
 void atacar();
 void mostrarPuntajes();
 void limpiar(Jugador*, Jugador*);
+void obtenerCarta(Jugador*);
 
 int main(int argc, char** argv) {
     cout << "¡Bienvenido a ************!";
@@ -84,6 +85,7 @@ static ListaPuntuaciones puntuaciones;
 Jugador jugador1;
 Jugador jugador2;
 Puntuacion nuevoPuntaje;
+bool gane;
 
 void iniciarJuego() {
     limpiar(&jugador1, &jugador2);
@@ -94,11 +96,14 @@ void iniciarJuego() {
 }
 
 void limpiar(Jugador* pJ1, Jugador* pJ2) {
+    gane = false;
+    ColaTurnos cola;
     Baraja b;
     Mano m;
     Campo c;
     *pJ1 = Jugador("", 0, b, m, c);
     *pJ2 = Jugador("", 0, b, m, c);
+    turnos = cola;
 }
 
 void generarBarajaJugador(Jugador* pJugador) {
@@ -145,8 +150,7 @@ void menuJugador() {
                 "\n6. Terminar turno.\n\nSeleccione su opci\u00f3n: ";
         cin >> opcionMenuJugador;
         procesarOpcionMenuJugador(&opcionMenuJugador);
-    } while (obtenerJugadorActual()->getVida() > 0 && obtenerJugadorSiguiente()->getVida() > 0);
-    declararGanador();
+    } while (gane == false);
 }
 
 void procesarOpcionMenuJugador(int* pOpcionMenuJugador) {
@@ -186,6 +190,7 @@ void colocarCartaEnCampo() {
     int iden, espacio;
     Carta c;
     Campo cp;
+    Mano m;
     cout << "\nIngrese el identificador de la carta que desea invocar: ";
     cin >> iden;
     c.setIdentificador(iden);
@@ -198,6 +203,9 @@ void colocarCartaEnCampo() {
         cp = obtenerJugadorActual()->getCampo();
         cp.colocarCarta(c, espacio);
         obtenerJugadorActual()->setCampo(cp);
+        m = obtenerJugadorActual()->getMano();
+        m.eliminarCartaDeMano(c);
+        obtenerJugadorActual()->setMano(m);
     }
 }
 
@@ -226,6 +234,29 @@ void terminarTurno() {
     cout << "\nTermino el turno del jugador "
             << turnos.getFrente()->getInfo()->getAlias();
     turnos.terminarTurno();
+    obtenerCarta(turnos.getFrente()->getInfo());
+}
+
+void obtenerCarta(Jugador* pJugador) {
+    if (pJugador->getBaraja().getPilaCartas().getLongitud() > 0) {
+        Baraja bara = pJugador->getBaraja();
+        Mano mano = pJugador->getMano();
+        PilaCartas mazo = bara.getPilaCartas();
+        ListaCartas lista = mano.getListaCartas();
+        NodoCartas* nodo = mazo.obtenerTope();
+        Carta car = nodo->getCarta();
+        lista.insertarCarta(car);
+        mano.setListaCartas(lista);
+        pJugador->setMano(mano);
+        bara.setPilaCartas(mazo);
+        pJugador->setBaraja(bara);
+    } else {
+        cout << "\n\nGano el jugador " << obtenerJugadorSiguiente()->getAlias() << " por deck out.";
+        nuevoPuntaje.setNomJugador(obtenerJugadorSiguiente()->getAlias());
+        nuevoPuntaje.setPuntuacion(1000);
+        puntuaciones.insertarOrdenado(&nuevoPuntaje);
+        gane = true;
+    }
 }
 
 void mostrarJugadores() {
@@ -275,13 +306,16 @@ void declararGanador() {
     if (vidaJ1 <= 0 && vidaJ2 > 0) {
         cout << "\n\nGano el jugador " << obtenerJugadorSiguiente()->getAlias();
         nuevoPuntaje.setNomJugador(obtenerJugadorSiguiente()->getAlias());
+        nuevoPuntaje.setPuntuacion(1000);
+        puntuaciones.insertarOrdenado(&nuevoPuntaje);
+        gane = true;
     } else if (vidaJ1 > 0 && vidaJ2 <= 0) {
         nuevoPuntaje.setNomJugador(obtenerJugadorActual()->getAlias());
         cout << "\n\nGano el jugador " << obtenerJugadorActual()->getAlias();
+        nuevoPuntaje.setPuntuacion(1000);
+        puntuaciones.insertarOrdenado(&nuevoPuntaje);
+        gane = true;
     }
-
-    nuevoPuntaje.setPuntuacion(1000);
-    puntuaciones.insertarOrdenado(&nuevoPuntaje);
 }
 
 void mostrarPuntajes() {
@@ -320,4 +354,5 @@ void atacar() {
         cp.eliminarCarta(c1);
         obtenerJugadorActual()->setCampo(cp);
     }
+    declararGanador();
 }
