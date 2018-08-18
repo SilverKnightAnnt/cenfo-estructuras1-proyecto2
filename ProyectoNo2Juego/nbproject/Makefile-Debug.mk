@@ -38,10 +38,12 @@ OBJECTFILES= \
 	${OBJECTDIR}/Baraja.o \
 	${OBJECTDIR}/Campo.o \
 	${OBJECTDIR}/Carta.o \
+	${OBJECTDIR}/ColaTurnos.o \
 	${OBJECTDIR}/Jugador.o \
 	${OBJECTDIR}/ListaCartas.o \
 	${OBJECTDIR}/Mano.o \
 	${OBJECTDIR}/NodoCartas.o \
+	${OBJECTDIR}/NodoTurno.o \
 	${OBJECTDIR}/PilaCartas.o \
 	${OBJECTDIR}/main.o
 
@@ -85,6 +87,11 @@ ${OBJECTDIR}/Carta.o: Carta.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Carta.o Carta.cpp
 
+${OBJECTDIR}/ColaTurnos.o: ColaTurnos.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ColaTurnos.o ColaTurnos.cpp
+
 ${OBJECTDIR}/Jugador.o: Jugador.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -104,6 +111,11 @@ ${OBJECTDIR}/NodoCartas.o: NodoCartas.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NodoCartas.o NodoCartas.cpp
+
+${OBJECTDIR}/NodoTurno.o: NodoTurno.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/NodoTurno.o NodoTurno.cpp
 
 ${OBJECTDIR}/PilaCartas.o: PilaCartas.cpp
 	${MKDIR} -p ${OBJECTDIR}

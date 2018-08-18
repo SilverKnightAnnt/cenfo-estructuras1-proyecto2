@@ -15,6 +15,8 @@
 #include "Mano.h"
 #include "Jugador.h"
 #include "ListaCartas.h"
+#include "NodoTurno.h"
+#include "ColaTurnos.h"
 #include <cstdlib>
 #include <string>
 #include <iostream>
@@ -33,6 +35,13 @@ void verMano();
 void colocarCartaEnCampo();
 void verCampo();
 void verDetalleCarta();
+void mostrarJugadores();
+void terminarTurno();
+Jugador* obtenerJugadorActual();
+Jugador* obtenerJugadorSiguiente();
+Jugador* mostrarCartasJugador();
+void initJugador(Jugador*, int, int);
+void declararGanador();
 
 int main(int argc, char** argv) {
     cout << "¡Bienvenido a ************!";
@@ -43,8 +52,8 @@ int main(int argc, char** argv) {
 void mostrarMenu() {
     int opcionMenu = -1;
     do {
-        cout << "\n\nMenú principal"
-                "\n1. Iniciar juego.\n2. Ranking.\n3. Salir.\n\nSeleccione su opción: ";
+        cout << "\n\nMen\u00fa principal"
+                "\n1. Iniciar juego.\n2. Ranking.\n3. Salir.\n\nSeleccione su opci\u00f3n: ";
         cin >> opcionMenu;
         procesarOpcionMenu(&opcionMenu);
     } while (opcionMenu != 3);
@@ -60,27 +69,17 @@ void procesarOpcionMenu(int* pOpcion) {
         case 3:
             break;
         default:
-            cout << "Opción incorrecta.";
+            cout << "Opci\u00f3n incorrecta.";
     }
 }
 
+static ColaTurnos turnos;
 Jugador jugador1;
 Jugador jugador2;
 
 void iniciarJuego() {
-    string aliasJ1, aliasJ2;
-    cout << "Jugador 1 -> Ingrese su nickname: ";
-    cin >> aliasJ1;
-    jugador1.setAlias(aliasJ1);
-    jugador1.setVida(10);
-    generarBarajaJugador(&jugador1);
-    generarManoJugador(&jugador1);
-    cout << "Jugador 2 -> Ingrese su nickname: ";
-    cin >> aliasJ2;
-    jugador2.setAlias(aliasJ2);
-    jugador2.setVida(10);
-    generarBarajaJugador(&jugador2);
-    generarManoJugador(&jugador2);
+    initJugador(&jugador1, 1, 10);
+    initJugador(&jugador2, 2, 10);
     cout << "\n¡DUELO!";
     menuJugador();
 }
@@ -120,13 +119,17 @@ void generarManoJugador(Jugador* pJugador) {
 void menuJugador() {
     int opcionMenuJugador = -1;
     do {
-        cout << "\n\nMenú del jugador"
+        cout << "\n\n***********************\nInicia el turno del jugador "
+                << turnos.getFrente()->getInfo()->getAlias() <<
+                "\n***********************";
+        cout << "\n\nMen\u00fa del jugador"
                 "\n1. Ver mano.\n2. Colocar carta.\n3. Ver campo."
                 "\n4. Ver detalle de carta en campo.\n5. Atacar."
-                "\n6. Terminar turno.\n\nSeleccione su opción: ";
+                "\n6. Terminar turno.\n\nSeleccione su opci\u00f3n: ";
         cin >> opcionMenuJugador;
         procesarOpcionMenuJugador(&opcionMenuJugador);
-    } while (opcionMenuJugador != 7);
+    } while (obtenerJugadorActual()->getVida() > 0 && obtenerJugadorSiguiente()->getVida() > 0);
+    declararGanador();
 }
 
 void procesarOpcionMenuJugador(int* pOpcionMenuJugador) {
@@ -147,87 +150,113 @@ void procesarOpcionMenuJugador(int* pOpcionMenuJugador) {
 
             break;
         case 6:
-
+            terminarTurno();
+            break;
+        case 7:
+            mostrarJugadores();
             break;
         default:
-            cout << "Opción incorrecta.";
+            cout << "Opci\u00f3n incorrecta.";
     }
 }
 
 void verMano() {
-    string alias;
-    Jugador j;
-    cout << "\nIngrese el alias del jugador para ver la mano: ";
-    cin >> alias;
-    j.setAlias(alias);
-    if (jugador1.getAlias() == alias) {
-        cout << jugador1.getMano().imprimirMano();
-    } else if (jugador2.getAlias() == alias) {
-        cout << jugador2.getMano().imprimirMano();
-    }
+    cout << obtenerJugadorActual()->getMano().imprimirMano();
 }
 
 void colocarCartaEnCampo() {
     verMano();
-    string alias;
     int iden, espacio;
-    Jugador j;
     Carta c;
     Campo cp;
-    cout << "\n\nIngrese el alias del jugador para colocar: ";
-    cin >> alias;
-    j.setAlias(alias);
-    cout << "Ingrese el identificador de la carta que desea invocar: ";
+    cout << "\nIngrese el identificador de la carta que desea invocar: ";
     cin >> iden;
     c.setIdentificador(iden);
-    if (jugador1.getAlias() == alias) {
-        NodoCartas* cartaBuscar = jugador1.getMano().getListaCartas().buscarCartaPorIdentificador(c);
-        if (cartaBuscar != NULL) {
-            c = cartaBuscar->getCarta();
-            cout << "Digite el espacio al cual la quiere agregar (1-5): ";
-            cin >> espacio;
-            espacio--;
-            cp = jugador1.getCampo();
-            cp.colocarCarta(c, espacio);
-            jugador1.setCampo(cp);
-        }
-    } else if (jugador2.getAlias() == alias) {
-        NodoCartas* cartaBuscar = jugador2.getMano().getListaCartas().buscarCartaPorIdentificador(c);
-        if (cartaBuscar != NULL) {
-            c = cartaBuscar->getCarta();
-            cout << "Digite el espacio al cual la quiere agregar (1-5): ";
-            cin >> espacio;
-            espacio--;
-            cp = jugador2.getCampo();
-            cp.colocarCarta(c, espacio);
-            jugador2.setCampo(cp);
-        }
+    NodoCartas* cartaBuscar = obtenerJugadorActual()->getMano().getListaCartas().buscarCartaPorIdentificador(c);
+    if (cartaBuscar != NULL) {
+        c = cartaBuscar->getCarta();
+        cout << "Digite el espacio al cual la quiere agregar (1-5): ";
+        cin >> espacio;
+        espacio--;
+        cp = obtenerJugadorActual()->getCampo();
+        cp.colocarCarta(c, espacio);
+        obtenerJugadorActual()->setCampo(cp);
     }
 }
 
-void verCampo(){
-    cout << jugador2.getCampo().imprimirCampo();
+void verCampo() {
+    cout << obtenerJugadorSiguiente()->getCampo().imprimirCampo();
     cout << "\n---------------------------------------------------------";
-    cout << "\n" << jugador1.getCampo().imprimirCampo();
+    cout << "\n" << obtenerJugadorActual()->getCampo().imprimirCampo();
 }
 
-void verDetalleCarta(){
+void verDetalleCarta() {
     verCampo();
-    string alias;
     int iden;
-    Jugador j;
     Carta c;
-    cout << "\n\nIngrese el alias del jugador para ver detalle: ";
-    cin >> alias;
-    j.setAlias(alias);
-    cout << "Ingrese el identificador de la carta que desea ver: ";
+    cout << "\nIngrese el identificador de la carta que desea ver: ";
     cin >> iden;
     c.setIdentificador(iden);
     cout << "\n***********************************************************";
-    if (jugador1.getAlias() == alias) {
-        cout << jugador1.getCampo().verDetalleCarta(c).imprimirCarta(); 
-    } else if (jugador2.getAlias() == alias) {
-        cout << jugador2.getCampo().verDetalleCarta(c).imprimirCarta();   
-    }
+    cout << mostrarCartasJugador()->getCampo().verDetalleCarta(c).imprimirCarta();
     cout << "\n***********************************************************";
+}
+
+void terminarTurno() {
+    cout << "\nTermino el turno del jugador "
+            << turnos.getFrente()->getInfo()->getAlias();
+    turnos.terminarTurno();
+}
+
+void mostrarJugadores() {
+    cout << turnos.mostrar();
+}
+
+Jugador* obtenerJugadorActual() {
+    return turnos.getFrente()->getInfo();
+}
+
+Jugador* obtenerJugadorSiguiente() {
+    return turnos.getFinal()->getInfo();
+}
+
+Jugador* mostrarCartasJugador() {
+    int opcion;
+    cout << "\n1. Ver el detalle de tus cartas"
+            "\n2. Ver el detalle de las cartas enemigas"
+            "\n\nSeleccione su opci\u00f3n: ";
+    cin >> opcion;
+
+    if (opcion == 1) {
+        return obtenerJugadorActual();
+    } else if (opcion == 2) {
+        return obtenerJugadorSiguiente();
+    }
+
+    cout << "\nOpci\u00f3n incorrecta.";
+    return NULL;
+}
+
+void initJugador(Jugador* pJugador, int pNumPlayer ,int pVidaPlayer) {
+    string alias;
+    cout << "Jugador " << pNumPlayer << "-> Ingrese su nickname: ";
+    cin >> alias;
+    pJugador->setAlias(alias);
+    pJugador->setVida(pVidaPlayer);
+    generarBarajaJugador(pJugador);
+    generarManoJugador(pJugador);
+    turnos.insertarElem(pJugador);
+}
+
+void declararGanador() {
+    int vidaJ1 = obtenerJugadorActual()->getVida();
+    int vidaJ2 = obtenerJugadorSiguiente()->getVida();
+    
+    if (vidaJ1 <= 0 && vidaJ2 > 0) {
+        cout << "\n\nGano el jugador " << obtenerJugadorSiguiente()->getAlias();
+    } else if (vidaJ1 > 0 && vidaJ2 <= 0){
+        cout << "\n\nGano el jugador " << obtenerJugadorActual()->getAlias();
+    } else {
+        cout << "\n\nJuego empatado";
+    }
 }
