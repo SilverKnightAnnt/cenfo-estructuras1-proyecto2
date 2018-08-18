@@ -40,7 +40,8 @@ void terminarTurno();
 Jugador* obtenerJugadorActual();
 Jugador* obtenerJugadorSiguiente();
 Jugador* mostrarCartasJugador();
-void initJugador(Jugador*, int);
+void initJugador(Jugador*, int, int);
+void declararGanador();
 
 int main(int argc, char** argv) {
     cout << "¡Bienvenido a ************!";
@@ -77,8 +78,8 @@ Jugador jugador1;
 Jugador jugador2;
 
 void iniciarJuego() {
-    initJugador(&jugador1, 1);
-    initJugador(&jugador2, 2);
+    initJugador(&jugador1, 1, 10);
+    initJugador(&jugador2, 2, 10);
     cout << "\n¡DUELO!";
     menuJugador();
 }
@@ -127,7 +128,8 @@ void menuJugador() {
                 "\n6. Terminar turno.\n\nSeleccione su opci\u00f3n: ";
         cin >> opcionMenuJugador;
         procesarOpcionMenuJugador(&opcionMenuJugador);
-    } while (opcionMenuJugador != 7);
+    } while (obtenerJugadorActual()->getVida() > 0 && obtenerJugadorSiguiente()->getVida() > 0);
+    declararGanador();
 }
 
 void procesarOpcionMenuJugador(int* pOpcionMenuJugador) {
@@ -154,7 +156,7 @@ void procesarOpcionMenuJugador(int* pOpcionMenuJugador) {
             mostrarJugadores();
             break;
         default:
-            cout << "Opción incorrecta.";
+            cout << "Opci\u00f3n incorrecta.";
     }
 }
 
@@ -235,13 +237,26 @@ Jugador* mostrarCartasJugador() {
     return NULL;
 }
 
-void initJugador(Jugador* pJugador, int pNum) {
+void initJugador(Jugador* pJugador, int pNumPlayer ,int pVidaPlayer) {
     string alias;
-    cout << "Jugador " << pNum << "-> Ingrese su nickname: ";
+    cout << "Jugador " << pNumPlayer << "-> Ingrese su nickname: ";
     cin >> alias;
     pJugador->setAlias(alias);
-    pJugador->setVida(10);
+    pJugador->setVida(pVidaPlayer);
     generarBarajaJugador(pJugador);
     generarManoJugador(pJugador);
     turnos.insertarElem(pJugador);
+}
+
+void declararGanador() {
+    int vidaJ1 = obtenerJugadorActual()->getVida();
+    int vidaJ2 = obtenerJugadorSiguiente()->getVida();
+    
+    if (vidaJ1 <= 0 && vidaJ2 > 0) {
+        cout << "\n\nGano el jugador " << obtenerJugadorSiguiente()->getAlias();
+    } else if (vidaJ1 > 0 && vidaJ2 <= 0){
+        cout << "\n\nGano el jugador " << obtenerJugadorActual()->getAlias();
+    } else {
+        cout << "\n\nJuego empatado";
+    }
 }
