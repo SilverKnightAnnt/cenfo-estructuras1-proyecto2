@@ -38,6 +38,9 @@ void verDetalleCarta();
 void mostrarJugadores();
 void terminarTurno();
 Jugador* obtenerJugadorActual();
+Jugador* obtenerJugadorSiguiente();
+Jugador* mostrarCartasJugador();
+void initJugador(Jugador*, int);
 
 int main(int argc, char** argv) {
     cout << "¡Bienvenido a ************!";
@@ -48,8 +51,8 @@ int main(int argc, char** argv) {
 void mostrarMenu() {
     int opcionMenu = -1;
     do {
-        cout << "\n\nMenú principal"
-                "\n1. Iniciar juego.\n2. Ranking.\n3. Salir.\n\nSeleccione su opción: ";
+        cout << "\n\nMen\u00fa principal"
+                "\n1. Iniciar juego.\n2. Ranking.\n3. Salir.\n\nSeleccione su opci\u00f3n: ";
         cin >> opcionMenu;
         procesarOpcionMenu(&opcionMenu);
     } while (opcionMenu != 3);
@@ -65,7 +68,7 @@ void procesarOpcionMenu(int* pOpcion) {
         case 3:
             break;
         default:
-            cout << "Opción incorrecta.";
+            cout << "Opci\u00f3n incorrecta.";
     }
 }
 
@@ -74,21 +77,8 @@ Jugador jugador1;
 Jugador jugador2;
 
 void iniciarJuego() {
-    string aliasJ1, aliasJ2;
-    cout << "Jugador 1 -> Ingrese su nickname: ";
-    cin >> aliasJ1;
-    jugador1.setAlias(aliasJ1);
-    jugador1.setVida(10);
-    generarBarajaJugador(&jugador1);
-    generarManoJugador(&jugador1);
-    cout << "Jugador 2 -> Ingrese su nickname: ";
-    cin >> aliasJ2;
-    jugador2.setAlias(aliasJ2);
-    jugador2.setVida(10);
-    generarBarajaJugador(&jugador2);
-    generarManoJugador(&jugador2);
-    turnos.insertarElem(&jugador1);
-    turnos.insertarElem(&jugador2);
+    initJugador(&jugador1, 1);
+    initJugador(&jugador2, 2);
     cout << "\n¡DUELO!";
     menuJugador();
 }
@@ -131,10 +121,10 @@ void menuJugador() {
         cout << "\n\n***********************\nInicia el turno del jugador "
                 << turnos.getFrente()->getInfo()->getAlias() <<
                 "\n***********************";
-        cout << "\n\nMenú del jugador"
+        cout << "\n\nMen\u00fa del jugador"
                 "\n1. Ver mano.\n2. Colocar carta.\n3. Ver campo."
                 "\n4. Ver detalle de carta en campo.\n5. Atacar."
-                "\n6. Terminar turno.\n\nSeleccione su opción: ";
+                "\n6. Terminar turno.\n\nSeleccione su opci\u00f3n: ";
         cin >> opcionMenuJugador;
         procesarOpcionMenuJugador(&opcionMenuJugador);
     } while (opcionMenuJugador != 7);
@@ -193,20 +183,20 @@ void colocarCartaEnCampo() {
 }
 
 void verCampo() {
-    cout << jugador2.getCampo().imprimirCampo();
+    cout << obtenerJugadorSiguiente()->getCampo().imprimirCampo();
     cout << "\n---------------------------------------------------------";
-    cout << "\n" << jugador1.getCampo().imprimirCampo();
+    cout << "\n" << obtenerJugadorActual()->getCampo().imprimirCampo();
 }
 
 void verDetalleCarta() {
     verCampo();
     int iden;
     Carta c;
-    cout << "Ingrese el identificador de la carta que desea ver: ";
+    cout << "\nIngrese el identificador de la carta que desea ver: ";
     cin >> iden;
     c.setIdentificador(iden);
     cout << "\n***********************************************************";
-    cout << obtenerJugadorActual()->getCampo().verDetalleCarta(c).imprimirCarta();
+    cout << mostrarCartasJugador()->getCampo().verDetalleCarta(c).imprimirCarta();
     cout << "\n***********************************************************";
 }
 
@@ -222,4 +212,36 @@ void mostrarJugadores() {
 
 Jugador* obtenerJugadorActual() {
     return turnos.getFrente()->getInfo();
+}
+
+Jugador* obtenerJugadorSiguiente() {
+    return turnos.getFinal()->getInfo();
+}
+
+Jugador* mostrarCartasJugador() {
+    int opcion;
+    cout << "\n1. Ver el detalle de tus cartas"
+            "\n2. Ver el detalle de las cartas enemigas"
+            "\n\nSeleccione su opci\u00f3n: ";
+    cin >> opcion;
+
+    if (opcion == 1) {
+        return obtenerJugadorActual();
+    } else if (opcion == 2) {
+        return obtenerJugadorSiguiente();
+    }
+
+    cout << "\nOpci\u00f3n incorrecta.";
+    return NULL;
+}
+
+void initJugador(Jugador* pJugador, int pNum) {
+    string alias;
+    cout << "Jugador " << pNum << "-> Ingrese su nickname: ";
+    cin >> alias;
+    pJugador->setAlias(alias);
+    pJugador->setVida(10);
+    generarBarajaJugador(pJugador);
+    generarManoJugador(pJugador);
+    turnos.insertarElem(pJugador);
 }
