@@ -17,6 +17,8 @@
 #include "ListaCartas.h"
 #include "NodoTurno.h"
 #include "ColaTurnos.h"
+#include "Puntuacion.h"
+#include "ListaPuntuaciones.h"
 #include <cstdlib>
 #include <string>
 #include <iostream>
@@ -42,6 +44,7 @@ Jugador* obtenerJugadorSiguiente();
 Jugador* mostrarCartasJugador();
 void initJugador(Jugador*, int, int);
 void declararGanador();
+void mostrarPuntajes();
 
 int main(int argc, char** argv) {
     cout << "¡Bienvenido a ************!";
@@ -65,6 +68,7 @@ void procesarOpcionMenu(int* pOpcion) {
             iniciarJuego();
             break;
         case 2:
+            mostrarPuntajes();
             break;
         case 3:
             break;
@@ -74,8 +78,10 @@ void procesarOpcionMenu(int* pOpcion) {
 }
 
 static ColaTurnos turnos;
+static ListaPuntuaciones puntuaciones;
 Jugador jugador1;
 Jugador jugador2;
+Puntuacion nuevoPuntaje;
 
 void iniciarJuego() {
     initJugador(&jugador1, 1, 10);
@@ -237,7 +243,7 @@ Jugador* mostrarCartasJugador() {
     return NULL;
 }
 
-void initJugador(Jugador* pJugador, int pNumPlayer ,int pVidaPlayer) {
+void initJugador(Jugador* pJugador, int pNumPlayer, int pVidaPlayer) {
     string alias;
     cout << "Jugador " << pNumPlayer << "-> Ingrese su nickname: ";
     cin >> alias;
@@ -251,12 +257,19 @@ void initJugador(Jugador* pJugador, int pNumPlayer ,int pVidaPlayer) {
 void declararGanador() {
     int vidaJ1 = obtenerJugadorActual()->getVida();
     int vidaJ2 = obtenerJugadorSiguiente()->getVida();
-    
+
     if (vidaJ1 <= 0 && vidaJ2 > 0) {
         cout << "\n\nGano el jugador " << obtenerJugadorSiguiente()->getAlias();
-    } else if (vidaJ1 > 0 && vidaJ2 <= 0){
+        nuevoPuntaje.setNomJugador(obtenerJugadorSiguiente()->getAlias());
+    } else if (vidaJ1 > 0 && vidaJ2 <= 0) {
+        nuevoPuntaje.setNomJugador(obtenerJugadorActual()->getAlias());
         cout << "\n\nGano el jugador " << obtenerJugadorActual()->getAlias();
-    } else {
-        cout << "\n\nJuego empatado";
     }
+
+    nuevoPuntaje.setPuntuacion(1000);
+    puntuaciones.insertarOrdenado(&nuevoPuntaje);
+}
+
+void mostrarPuntajes() {
+    cout << puntuaciones.mostrar();
 }
