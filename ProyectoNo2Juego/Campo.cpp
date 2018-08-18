@@ -24,6 +24,15 @@ Carta Campo::verDetalleCarta(Carta pCarta){
     }
 }
 
+void Campo::eliminarCarta(Carta pCarta){
+    Carta dropper[5];
+    for(int i = 0;i < 5;i++){
+        if(cartas[i].getIdentificador() == pCarta.getIdentificador()){
+            cartas[i] = dropper[i];
+        }
+    }
+}
+
 string Campo::imprimirCampo() {
     stringstream impresion;
     for (int i = 0 ; i < 5; i++) {

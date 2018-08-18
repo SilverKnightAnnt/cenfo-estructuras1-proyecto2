@@ -17,6 +17,8 @@
 #include "ListaCartas.h"
 #include "NodoTurno.h"
 #include "ColaTurnos.h"
+#include "Puntuacion.h"
+#include "ListaPuntuaciones.h"
 #include <cstdlib>
 #include <string>
 #include <iostream>
@@ -42,6 +44,8 @@ Jugador* obtenerJugadorSiguiente();
 Jugador* mostrarCartasJugador();
 void initJugador(Jugador*, int, int);
 void declararGanador();
+void atacar();
+void mostrarPuntajes();
 
 int main(int argc, char** argv) {
     cout << "¡Bienvenido a ************!";
@@ -65,6 +69,7 @@ void procesarOpcionMenu(int* pOpcion) {
             iniciarJuego();
             break;
         case 2:
+            mostrarPuntajes();
             break;
         case 3:
             break;
@@ -74,8 +79,10 @@ void procesarOpcionMenu(int* pOpcion) {
 }
 
 static ColaTurnos turnos;
+static ListaPuntuaciones puntuaciones;
 Jugador jugador1;
 Jugador jugador2;
+Puntuacion nuevoPuntaje;
 
 void iniciarJuego() {
     initJugador(&jugador1, 1, 10);
@@ -147,7 +154,7 @@ void procesarOpcionMenuJugador(int* pOpcionMenuJugador) {
             verDetalleCarta();
             break;
         case 5:
-
+            atacar();
             break;
         case 6:
             terminarTurno();
@@ -185,9 +192,11 @@ void colocarCartaEnCampo() {
 }
 
 void verCampo() {
+    cout << "\n\n" << obtenerJugadorSiguiente()->getAlias() << " Vida: " << obtenerJugadorSiguiente()->getVida() << "\n\n";
     cout << obtenerJugadorSiguiente()->getCampo().imprimirCampo();
     cout << "\n---------------------------------------------------------";
     cout << "\n" << obtenerJugadorActual()->getCampo().imprimirCampo();
+    cout << "\n\n" << obtenerJugadorActual()->getAlias() << " Vida: " << obtenerJugadorActual()->getVida();
 }
 
 void verDetalleCarta() {
@@ -238,7 +247,7 @@ Jugador* mostrarCartasJugador() {
     return NULL;
 }
 
-void initJugador(Jugador* pJugador, int pNumPlayer ,int pVidaPlayer) {
+void initJugador(Jugador* pJugador, int pNumPlayer, int pVidaPlayer) {
     string alias;
     cout << "Jugador " << pNumPlayer << "-> Ingrese su nickname: ";
     cin >> alias;
@@ -252,12 +261,53 @@ void initJugador(Jugador* pJugador, int pNumPlayer ,int pVidaPlayer) {
 void declararGanador() {
     int vidaJ1 = obtenerJugadorActual()->getVida();
     int vidaJ2 = obtenerJugadorSiguiente()->getVida();
-    
+
     if (vidaJ1 <= 0 && vidaJ2 > 0) {
         cout << "\n\nGano el jugador " << obtenerJugadorSiguiente()->getAlias();
-    } else if (vidaJ1 > 0 && vidaJ2 <= 0){
+        nuevoPuntaje.setNomJugador(obtenerJugadorSiguiente()->getAlias());
+    } else if (vidaJ1 > 0 && vidaJ2 <= 0) {
+        nuevoPuntaje.setNomJugador(obtenerJugadorActual()->getAlias());
         cout << "\n\nGano el jugador " << obtenerJugadorActual()->getAlias();
-    } else {
-        cout << "\n\nJuego empatado";
+    }
+
+    nuevoPuntaje.setPuntuacion(1000);
+    puntuaciones.insertarOrdenado(&nuevoPuntaje);
+}
+
+void mostrarPuntajes() {
+    cout << puntuaciones.mostrar();
+}
+
+void atacar() {
+    int iden, iden2;
+    Carta c1, c2;
+    verCampo();
+    cout << "\n\nIngrese el identificador de la carta atacante: ";
+    cin >> iden;
+    c1.setIdentificador(iden);
+    c1 = obtenerJugadorActual()->getCampo().verDetalleCarta(c1);
+    cout << "Ingrese el identificador de la carta a atacar: ";
+    cin >> iden2;
+    c2.setIdentificador(iden2);
+    c2 = obtenerJugadorSiguiente()->getCampo().verDetalleCarta(c2);
+    if (c1.getAtaque() > c2.getDefensa()) {
+        int dif = c1.getAtaque() - c2.getDefensa();
+        obtenerJugadorSiguiente()->setVida((obtenerJugadorSiguiente()->getVida() - dif));
+        Campo cp = obtenerJugadorSiguiente()->getCampo();
+        cp.eliminarCarta(c2);
+        obtenerJugadorSiguiente()->setCampo(cp);
+    } else if (c1.getAtaque() == c2.getDefensa()) {
+        Campo cp1 = obtenerJugadorActual()->getCampo();
+        Campo cp2 = obtenerJugadorSiguiente()->getCampo();
+        cp1.eliminarCarta(c1);
+        cp2.eliminarCarta(c2);
+        obtenerJugadorActual()->setCampo(cp1);
+        obtenerJugadorSiguiente()->setCampo(cp2);
+    } else if (c1.getAtaque() < c2.getDefensa()) {
+        int dif = c2.getDefensa() - c1.getAtaque();
+        obtenerJugadorActual()->setVida((obtenerJugadorActual()->getVida() - dif));
+        Campo cp = obtenerJugadorActual()->getCampo();
+        cp.eliminarCarta(c1);
+        obtenerJugadorActual()->setCampo(cp);
     }
 }
