@@ -48,6 +48,7 @@ void atacar();
 void mostrarPuntajes();
 void limpiar(Jugador*, Jugador*);
 void obtenerCarta(Jugador*);
+void registrarPuntuacion(int, string);
 
 int main(int argc, char** argv) {
     cout << "¡Bienvenido a ************!";
@@ -84,7 +85,7 @@ static ColaTurnos turnos;
 static ListaPuntuaciones puntuaciones;
 Jugador jugador1;
 Jugador jugador2;
-Puntuacion nuevoPuntaje;
+Puntuacion* nuevoPuntaje;
 bool gane;
 bool enableSummon = true;
 bool enableAtack = true;
@@ -261,9 +262,7 @@ void obtenerCarta(Jugador* pJugador) {
         pJugador->setBaraja(bara);
     } else {
         cout << "\n\nGano el jugador " << obtenerJugadorSiguiente()->getAlias() << " por deck out.";
-        nuevoPuntaje.setNomJugador(obtenerJugadorSiguiente()->getAlias());
-        nuevoPuntaje.setPuntuacion(1000);
-        puntuaciones.insertarOrdenado(&nuevoPuntaje);
+        registrarPuntuacion(100, obtenerJugadorSiguiente()->getAlias());
         gane = true;
     }
 }
@@ -311,20 +310,19 @@ void initJugador(Jugador* pJugador, int pNumPlayer, int pVidaPlayer) {
 void declararGanador() {
     int vidaJ1 = obtenerJugadorActual()->getVida();
     int vidaJ2 = obtenerJugadorSiguiente()->getVida();
+    string nomGanador = "";
 
     if (vidaJ1 <= 0 && vidaJ2 > 0) {
         cout << "\n\nGano el jugador " << obtenerJugadorSiguiente()->getAlias();
-        nuevoPuntaje.setNomJugador(obtenerJugadorSiguiente()->getAlias());
-        nuevoPuntaje.setPuntuacion(1000);
-        puntuaciones.insertarOrdenado(&nuevoPuntaje);
+        nomGanador = obtenerJugadorSiguiente()->getAlias();
         gane = true;
     } else if (vidaJ1 > 0 && vidaJ2 <= 0) {
-        nuevoPuntaje.setNomJugador(obtenerJugadorActual()->getAlias());
         cout << "\n\nGano el jugador " << obtenerJugadorActual()->getAlias();
-        nuevoPuntaje.setPuntuacion(1000);
-        puntuaciones.insertarOrdenado(&nuevoPuntaje);
+        nomGanador = obtenerJugadorActual()->getAlias();
         gane = true;
     }
+
+    registrarPuntuacion(100, nomGanador);
 }
 
 void mostrarPuntajes() {
@@ -367,4 +365,20 @@ void atacar() {
         enableAtack = false;
         declararGanador();
     }
+}
+
+void registrarPuntuacion(int cantPuntaje, string nomJugador) {
+    nuevoPuntaje = puntuaciones.buscar(nomJugador);
+
+    if (nuevoPuntaje != NULL) {
+        puntuaciones.eliminar(nomJugador);
+        cantPuntaje += nuevoPuntaje->getPuntuacion();
+    } else {
+        nuevoPuntaje = new Puntuacion();
+        nuevoPuntaje->setNomJugador(nomJugador);
+
+    }
+
+    nuevoPuntaje->setPuntuacion(cantPuntaje);
+    puntuaciones.insertarOrdenado(nuevoPuntaje);
 }

@@ -23,12 +23,12 @@ ListaPuntuaciones::ListaPuntuaciones() {
 ListaPuntuaciones::~ListaPuntuaciones() {
 }
 
-void ListaPuntuaciones::setInicio(NodoPuntuacion* pNuevoNodo) {
-    inicio = pNuevoNodo;
+void ListaPuntuaciones::setInicio(NodoPuntuacion* pNuevoNodoPuntuacion) {
+    inicio = pNuevoNodoPuntuacion;
 }
 
-void ListaPuntuaciones::setUltimo(NodoPuntuacion* pNuevoNodo) {
-    ultimo = pNuevoNodo;
+void ListaPuntuaciones::setUltimo(NodoPuntuacion* pNuevoNodoPuntuacion) {
+    ultimo = pNuevoNodoPuntuacion;
 }
 
 NodoPuntuacion* ListaPuntuaciones::getInicio() {
@@ -62,7 +62,7 @@ void ListaPuntuaciones::insertarOrdenado(Puntuacion* pNewRecord) {
     } else {
         NodoPuntuacion* nuevo = new NodoPuntuacion(pNewRecord);
 
-        if (pNewRecord->getPuntuacion() < getInicio()->getInfo()->getPuntuacion()) {
+        if (pNewRecord->getPuntuacion() <= getInicio()->getInfo()->getPuntuacion()) {
             getInicio()->setAnterior(nuevo);
             nuevo->setSiguiente(getInicio());
             setInicio(nuevo);
@@ -96,9 +96,11 @@ Puntuacion* ListaPuntuaciones::buscar(string pNombre) {
     NodoPuntuacion* aux = getUltimo();
 
     while (aux != NULL) {
+
         if (aux->getInfo()->getNomJugador() == pNombre) {
             return aux->getInfo();
         }
+
         aux = aux->getAnterior();
     }
 
@@ -118,5 +120,37 @@ string ListaPuntuaciones::mostrar() {
 
     contenido << "--------------------------------------- \n";
     return contenido.str();
+}
+
+bool ListaPuntuaciones::eliminar(string pNombre) {
+    if (getInicio()->getInfo()->getNomJugador() == pNombre) {
+        setInicio(getInicio()->getSiguiente());
+        getInicio()->setAnterior(NULL);
+        return true;
+    }
+
+    if (getUltimo()->getInfo()->getNomJugador() == pNombre) {
+        setUltimo(getUltimo()->getAnterior());
+        getUltimo()->setSiguiente(NULL);
+        return true;
+    }
+
+    NodoPuntuacion* aux = getUltimo();
+
+    while (aux != NULL) {
+
+        if (aux->getInfo()->getNomJugador() == pNombre) {
+            NodoPuntuacion* newSiguiente = aux->getSiguiente();
+            NodoPuntuacion* newAnterior = aux->getAnterior();
+            newAnterior->setSiguiente(newSiguiente);
+            newSiguiente->setAnterior(newAnterior);
+            delete aux;
+            return true;
+        }
+
+        aux = aux->getAnterior();
+    }
+
+    return false;
 }
 

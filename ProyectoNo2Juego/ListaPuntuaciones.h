@@ -30,6 +30,7 @@ public:
     void insertarOrdenado(Puntuacion* pNewRecord);
     string mostrar();
     Puntuacion* buscar(string pNombre);
+    bool eliminar(string pNombre);
 private:
     bool esVacio();
     NodoPuntuacion* inicio;
