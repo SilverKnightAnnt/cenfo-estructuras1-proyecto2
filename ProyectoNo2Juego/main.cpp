@@ -310,19 +310,16 @@ void initJugador(Jugador* pJugador, int pNumPlayer, int pVidaPlayer) {
 void declararGanador() {
     int vidaJ1 = obtenerJugadorActual()->getVida();
     int vidaJ2 = obtenerJugadorSiguiente()->getVida();
-    string nomGanador = "";
 
     if (vidaJ1 <= 0 && vidaJ2 > 0) {
         cout << "\n\nGano el jugador " << obtenerJugadorSiguiente()->getAlias();
-        nomGanador = obtenerJugadorSiguiente()->getAlias();
         gane = true;
+        registrarPuntuacion(100, obtenerJugadorSiguiente()->getAlias());
     } else if (vidaJ1 > 0 && vidaJ2 <= 0) {
         cout << "\n\nGano el jugador " << obtenerJugadorActual()->getAlias();
-        nomGanador = obtenerJugadorActual()->getAlias();
         gane = true;
-    }
-
-    registrarPuntuacion(100, nomGanador);
+        registrarPuntuacion(100, obtenerJugadorActual()->getAlias());
+    }   
 }
 
 void mostrarPuntajes() {
@@ -332,34 +329,35 @@ void mostrarPuntajes() {
 void atacar() {
     if (conteoTurnos != 1 && enableAtack == true) {
         int iden, iden2;
-        Carta c1, c2;
+        Carta cartaJugActual, c2;
         verCampo();
         cout << "\n\nIngrese el identificador de la carta atacante: ";
         cin >> iden;
-        c1.setIdentificador(iden);
-        c1 = obtenerJugadorActual()->getCampo().verDetalleCarta(c1);
+        cartaJugActual.setIdentificador(iden);
+        cartaJugActual = obtenerJugadorActual()->getCampo().verDetalleCarta(cartaJugActual);
         cout << "Ingrese el identificador de la carta a atacar: ";
         cin >> iden2;
         c2.setIdentificador(iden2);
         c2 = obtenerJugadorSiguiente()->getCampo().verDetalleCarta(c2);
-        if (c1.getAtaque() > c2.getDefensa()) {
-            int dif = c1.getAtaque() - c2.getDefensa();
+        if (cartaJugActual.getAtaque() > c2.getDefensa()) {
+            int dif = cartaJugActual.getAtaque() - c2.getDefensa();
             obtenerJugadorSiguiente()->setVida((obtenerJugadorSiguiente()->getVida() - dif));
             Campo cp = obtenerJugadorSiguiente()->getCampo();
             cp.eliminarCarta(c2);
             obtenerJugadorSiguiente()->setCampo(cp);
-        } else if (c1.getAtaque() == c2.getDefensa()) {
+            registrarPuntuacion(10, obtenerJugadorActual()->getAlias());
+        } else if (cartaJugActual.getAtaque() == c2.getDefensa()) {
             Campo cp1 = obtenerJugadorActual()->getCampo();
             Campo cp2 = obtenerJugadorSiguiente()->getCampo();
-            cp1.eliminarCarta(c1);
+            cp1.eliminarCarta(cartaJugActual);
             cp2.eliminarCarta(c2);
             obtenerJugadorActual()->setCampo(cp1);
             obtenerJugadorSiguiente()->setCampo(cp2);
-        } else if (c1.getAtaque() < c2.getDefensa()) {
-            int dif = c2.getDefensa() - c1.getAtaque();
+        } else if (cartaJugActual.getAtaque() < c2.getDefensa()) {
+            int dif = c2.getDefensa() - cartaJugActual.getAtaque();
             obtenerJugadorActual()->setVida((obtenerJugadorActual()->getVida() - dif));
             Campo cp = obtenerJugadorActual()->getCampo();
-            cp.eliminarCarta(c1);
+            cp.eliminarCarta(cartaJugActual);
             obtenerJugadorActual()->setCampo(cp);
         }
         enableAtack = false;
