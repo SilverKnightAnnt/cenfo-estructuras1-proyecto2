@@ -19,6 +19,7 @@
 #include "ColaTurnos.h"
 #include "Puntuacion.h"
 #include "ListaPuntuaciones.h"
+#include "Controlador.h"
 #include <cstdlib>
 #include <string>
 #include <iostream>
@@ -37,18 +38,14 @@ void verMano();
 void colocarCartaEnCampo();
 void verCampo();
 void verDetalleCarta();
-void mostrarJugadores();
 void terminarTurno();
-Jugador* obtenerJugadorActual();
-Jugador* obtenerJugadorSiguiente();
 Jugador* mostrarCartasJugador();
-void initJugador(Jugador*, int, int);
 void declararGanador();
 void atacar();
-void mostrarPuntajes();
-void limpiar(Jugador*, Jugador*);
+void limpiar();
 void obtenerCarta(Jugador*);
-void registrarPuntuacion(int, string);
+
+static Controlador controlador;
 
 int main(int argc, char** argv) {
     cout << "¡Bienvenido a ************!";
@@ -72,7 +69,7 @@ void procesarOpcionMenu(int* pOpcion) {
             iniciarJuego();
             break;
         case 2:
-            mostrarPuntajes();
+            cout << controlador.mostrarPuntajes();
             break;
         case 3:
             break;
@@ -81,72 +78,34 @@ void procesarOpcionMenu(int* pOpcion) {
     }
 }
 
-static ColaTurnos turnos;
-static ListaPuntuaciones puntuaciones;
-Jugador jugador1;
-Jugador jugador2;
-Puntuacion* nuevoPuntaje;
 bool gane;
 bool enableSummon = true;
 bool enableAtack = true;
 int conteoTurnos = 1;
 
 void iniciarJuego() {
-    limpiar(&jugador1, &jugador2);
-    initJugador(&jugador1, 1, 10);
-    initJugador(&jugador2, 2, 10);
+    limpiar();
+    string aliasJ1, aliasJ2;
+    cout << "Jugador 1 -> Ingrese su nickname: ";
+    cin >> aliasJ1;
+    cout << "Jugador 2 -> Ingrese su nickname: ";
+    cin >> aliasJ2;
+    controlador.initJ1(aliasJ1, 10);
+    controlador.initJ2(aliasJ2, 10);
     cout << "\n¡DUELO!";
     menuJugador();
 }
 
-void limpiar(Jugador* pJ1, Jugador* pJ2) {
+void limpiar() {
     gane = false;
-    ColaTurnos cola;
-    Baraja b;
-    Mano m;
-    Campo c;
-    *pJ1 = Jugador("", 0, b, m, c);
-    *pJ2 = Jugador("", 0, b, m, c);
-    turnos = cola;
-}
-
-void generarBarajaJugador(Jugador* pJugador) {
-    srand((int) time(0));
-    int i = 0;
-    while (i++ < 20) {
-        int atk = (rand() % 10) + 1;
-        int def = (rand() % 10) + 1;
-        Carta carta = Carta(i, atk, def);
-        Baraja baraja = pJugador->getBaraja();
-        PilaCartas mazo = baraja.getPilaCartas();
-        mazo.insertarCarta(carta);
-        baraja.setPilaCartas(mazo);
-        pJugador->setBaraja(baraja);
-    }
-}
-
-void generarManoJugador(Jugador* pJugador) {
-    int j = 0;
-    while (j++ < 5) {
-        Baraja bara = pJugador->getBaraja();
-        Mano mano = pJugador->getMano();
-        PilaCartas mazo = bara.getPilaCartas();
-        ListaCartas lista = mano.getListaCartas();
-        NodoCartas* nodo = mazo.obtenerTope();
-        Carta car = nodo->getCarta();
-        lista.insertarCarta(car);
-        mano.setListaCartas(lista);
-        pJugador->setMano(mano);
-        bara.setPilaCartas(mazo);
-        pJugador->setBaraja(bara);
-    }
+    controlador.reiniciarJuego();
 }
 
 void menuJugador() {
     int opcionMenuJugador = -1;
     do {
         cout << "\n\n---------------------------------------------\nInicia el turno del jugador "
-                << turnos.getFrente()->getInfo()->getAlias() <<
+                << controlador.obtenerJ1()->getAlias() <<
                 "\n---------------------------------------------";
         cout << "\n\nMen\u00fa del jugador"
                 "\n1. Ver mano.\n2. Colocar carta.\n3. Ver campo."
@@ -154,6 +113,7 @@ void menuJugador() {
                 "\n6. Terminar turno.\n\nSeleccione su opci\u00f3n: ";
         cin >> opcionMenuJugador;
         procesarOpcionMenuJugador(&opcionMenuJugador);
+        declararGanador();
     } while (gane == false);
 }
 
@@ -178,7 +138,7 @@ void procesarOpcionMenuJugador(int* pOpcionMenuJugador) {
             terminarTurno();
             break;
         case 7:
-            mostrarJugadores();
+            cout << controlador.mostrarJugadores();
             break;
         default:
             cout << "Opci\u00f3n incorrecta.";
@@ -186,7 +146,7 @@ void procesarOpcionMenuJugador(int* pOpcionMenuJugador) {
 }
 
 void verMano() {
-    cout << obtenerJugadorActual()->getMano().imprimirMano();
+    cout << controlador.obtenerJ1()->getMano().imprimirMano();
 }
 
 void colocarCartaEnCampo() {
@@ -199,29 +159,29 @@ void colocarCartaEnCampo() {
         cout << "\nIngrese el identificador de la carta que desea invocar: ";
         cin >> iden;
         c.setIdentificador(iden);
-        NodoCartas* cartaBuscar = obtenerJugadorActual()->getMano().getListaCartas().buscarCartaPorIdentificador(c);
+        NodoCartas* cartaBuscar = controlador.obtenerJ1()->getMano().getListaCartas().buscarCartaPorIdentificador(c);
         if (cartaBuscar != NULL) {
             c = cartaBuscar->getCarta();
             cout << "Digite el espacio al cual la quiere agregar (1-5): ";
             cin >> espacio;
             espacio--;
-            cp = obtenerJugadorActual()->getCampo();
+            cp = controlador.obtenerJ1()->getCampo();
             cp.colocarCarta(c, espacio);
-            obtenerJugadorActual()->setCampo(cp);
-            m = obtenerJugadorActual()->getMano();
+            controlador.obtenerJ1()->setCampo(cp);
+            m = controlador.obtenerJ1()->getMano();
             m.eliminarCartaDeMano(c);
-            obtenerJugadorActual()->setMano(m);
+            controlador.obtenerJ1()->setMano(m);
         }
         enableSummon = false;
     }
 }
 
 void verCampo() {
-    cout << "\n\n" << obtenerJugadorSiguiente()->getAlias() << " Vida: " << obtenerJugadorSiguiente()->getVida() << "\n\n";
-    cout << obtenerJugadorSiguiente()->getCampo().imprimirCampo();
+    cout << "\n\n" << controlador.obtenerJ2()->getAlias() << " Vida: " << controlador.obtenerJ2()->getVida() << "\n\n";
+    cout << controlador.obtenerJ2()->getCampo().imprimirCampo();
     cout << "\n---------------------------------------------------------";
-    cout << "\n" << obtenerJugadorActual()->getCampo().imprimirCampo();
-    cout << "\n\n" << obtenerJugadorActual()->getAlias() << " Vida: " << obtenerJugadorActual()->getVida();
+    cout << "\n" << controlador.obtenerJ1()->getCampo().imprimirCampo();
+    cout << "\n\n" << controlador.obtenerJ1()->getAlias() << " Vida: " << controlador.obtenerJ1()->getVida();
 }
 
 void verDetalleCarta() {
@@ -239,9 +199,9 @@ void verDetalleCarta() {
 
 void terminarTurno() {
     cout << "\nTermino el turno del jugador "
-            << turnos.getFrente()->getInfo()->getAlias();
-    turnos.terminarTurno();
-    obtenerCarta(turnos.getFrente()->getInfo());
+            << controlador.obtenerJ1()->getAlias();
+    controlador.terminarTurnoJugador();
+    obtenerCarta(controlador.obtenerJ1());
     enableSummon = true;
     enableAtack = true;
     conteoTurnos++;
@@ -261,22 +221,11 @@ void obtenerCarta(Jugador* pJugador) {
         bara.setPilaCartas(mazo);
         pJugador->setBaraja(bara);
     } else {
-        cout << "\n\nGano el jugador " << obtenerJugadorSiguiente()->getAlias() << " por deck out.";
-        registrarPuntuacion(100, obtenerJugadorSiguiente()->getAlias());
+        cout << "\n\nGano el jugador " << controlador.obtenerJ2()->getAlias() << " por deck out.";
+        controlador.insertarPuntajes(100, controlador.obtenerJ2()->getAlias());
+        //controlador.insertarPuntajes(100, controlador.obtenerJ2()->getAlias());
         gane = true;
     }
-}
-
-void mostrarJugadores() {
-    cout << turnos.mostrar();
-}
-
-Jugador* obtenerJugadorActual() {
-    return turnos.getFrente()->getInfo();
-}
-
-Jugador* obtenerJugadorSiguiente() {
-    return turnos.getFinal()->getInfo();
 }
 
 Jugador* mostrarCartasJugador() {
@@ -287,43 +236,28 @@ Jugador* mostrarCartasJugador() {
     cin >> opcion;
 
     if (opcion == 1) {
-        return obtenerJugadorActual();
+        return controlador.obtenerJ1();
     } else if (opcion == 2) {
-        return obtenerJugadorSiguiente();
+        return controlador.obtenerJ2();
     }
 
     cout << "\nOpci\u00f3n incorrecta.";
     return NULL;
 }
 
-void initJugador(Jugador* pJugador, int pNumPlayer, int pVidaPlayer) {
-    string alias;
-    cout << "Jugador " << pNumPlayer << "-> Ingrese su nickname: ";
-    cin >> alias;
-    pJugador->setAlias(alias);
-    pJugador->setVida(pVidaPlayer);
-    generarBarajaJugador(pJugador);
-    generarManoJugador(pJugador);
-    turnos.insertarElem(pJugador);
-}
-
 void declararGanador() {
-    int vidaJ1 = obtenerJugadorActual()->getVida();
-    int vidaJ2 = obtenerJugadorSiguiente()->getVida();
+    int vidaJ1 = controlador.obtenerJ1()->getVida();
+    int vidaJ2 = controlador.obtenerJ2()->getVida();
 
     if (vidaJ1 <= 0 && vidaJ2 > 0) {
-        cout << "\n\nGano el jugador " << obtenerJugadorSiguiente()->getAlias();
+        cout << "\n\nGano el jugador " << controlador.obtenerJ2()->getAlias();
         gane = true;
-        registrarPuntuacion(100, obtenerJugadorSiguiente()->getAlias());
+        controlador.insertarPuntajes(100, controlador.obtenerJ2()->getAlias());
     } else if (vidaJ1 > 0 && vidaJ2 <= 0) {
-        cout << "\n\nGano el jugador " << obtenerJugadorActual()->getAlias();
+        cout << "\n\nGano el jugador " << controlador.obtenerJ1()->getAlias();
         gane = true;
-        registrarPuntuacion(100, obtenerJugadorActual()->getAlias());
+        controlador.insertarPuntajes(100, controlador.obtenerJ1()->getAlias());
     }
-}
-
-void mostrarPuntajes() {
-    cout << puntuaciones.mostrar();
 }
 
 void atacar() {
@@ -334,58 +268,42 @@ void atacar() {
         cout << "\n\nIngrese el identificador de la carta atacante: ";
         cin >> iden;
         cartaJ1.setIdentificador(iden);
-        cartaJ1 = obtenerJugadorActual()->getCampo().verDetalleCarta(cartaJ1);
+        cartaJ1 = controlador.obtenerJ1()->getCampo().verDetalleCarta(cartaJ1);
         cout << "Ingrese el identificador de la carta a atacar: ";
         cin >> iden2;
         cartaJ2.setIdentificador(iden2);
-        cartaJ2 = obtenerJugadorSiguiente()->getCampo().verDetalleCarta(cartaJ2);
+        cartaJ2 = controlador.obtenerJ2()->getCampo().verDetalleCarta(cartaJ2);
 
         if (cartaJ1.getAtaque() > cartaJ2.getDefensa()) {
             int dif = cartaJ1.getAtaque() - cartaJ2.getDefensa();
-            obtenerJugadorSiguiente()->setVida((obtenerJugadorSiguiente()->getVida() - dif));
-            Campo campoJ2 = obtenerJugadorSiguiente()->getCampo();
+            controlador.obtenerJ2()->setVida((controlador.obtenerJ2()->getVida() - dif));
+            Campo campoJ2 = controlador.obtenerJ2()->getCampo();
             campoJ2.eliminarCarta(cartaJ2);
-            obtenerJugadorSiguiente()->setCampo(campoJ2);
-            //registrarPuntuacion(10, obtenerJugadorActual()->getAlias());
+            controlador.obtenerJ2()->setCampo(campoJ2);
+            //controlador.insertarPuntajes(10, controlador.obtenerJ1()->getAlias());
         }
 
         if (cartaJ1.getAtaque() == cartaJ2.getDefensa()) {
-            Campo campoJ1 = obtenerJugadorActual()->getCampo();
-            Campo campoJ2 = obtenerJugadorSiguiente()->getCampo();
+            Campo campoJ1 = controlador.obtenerJ1()->getCampo();
+            Campo campoJ2 = controlador.obtenerJ2()->getCampo();
             campoJ1.eliminarCarta(cartaJ1);
             campoJ2.eliminarCarta(cartaJ2);
-            obtenerJugadorActual()->setCampo(campoJ1);
-            obtenerJugadorSiguiente()->setCampo(campoJ2);
-            //registrarPuntuacion(10, obtenerJugadorActual()->getAlias());
-            //registrarPuntuacion(10, obtenerJugadorSiguiente()->getAlias());
+            controlador.obtenerJ1()->setCampo(campoJ1);
+            controlador.obtenerJ2()->setCampo(campoJ2);
+            //controlador.insertarPuntajes(10, controlador.obtenerJ1()->getAlias());
+            //controlador.insertarPuntajes(10, controlador.obtenerJ2()->getAlias());
         }
 
         if (cartaJ1.getAtaque() < cartaJ2.getDefensa()) {
             int dif = cartaJ2.getDefensa() - cartaJ1.getAtaque();
-            obtenerJugadorActual()->setVida((obtenerJugadorActual()->getVida() - dif));
-            Campo campoJ1 = obtenerJugadorActual()->getCampo();
+            controlador.obtenerJ1()->setVida((controlador.obtenerJ1()->getVida() - dif));
+            Campo campoJ1 = controlador.obtenerJ1()->getCampo();
             campoJ1.eliminarCarta(cartaJ1);
-            obtenerJugadorActual()->setCampo(campoJ1);
-            //registrarPuntuacion(-15, obtenerJugadorActual()->getAlias());
+            controlador.obtenerJ1()->setCampo(campoJ1);
+            //controlador.insertarPuntajes(-15, controlador.obtenerJ1()->getAlias());
         }
 
         enableAtack = false;
         declararGanador();
     }
-}
-
-void registrarPuntuacion(int cantPuntaje, string nomJugador) {
-    nuevoPuntaje = puntuaciones.buscar(nomJugador);
-
-    if (nuevoPuntaje != NULL) {
-        puntuaciones.eliminar(nomJugador);
-        cantPuntaje += nuevoPuntaje->getPuntuacion();
-    } else {
-        nuevoPuntaje = new Puntuacion();
-        nuevoPuntaje->setNomJugador(nomJugador);
-
-    }
-
-    nuevoPuntaje->setPuntuacion(cantPuntaje);
-    puntuaciones.insertarOrdenado(nuevoPuntaje);
 }
