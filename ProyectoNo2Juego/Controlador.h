@@ -26,7 +26,6 @@
 #include "Controlador.h"
 #include <cstdlib>
 #include <string>
-#include <iostream>
 #include <ctime>
 
 using namespace std;
@@ -57,7 +56,6 @@ public:
 
 private:
     Jugador* obtenerCampoJugador(int pNumJugador);
-    bool enableSummon = false;
 };
 
 #endif /* CONTROLADOR_H */

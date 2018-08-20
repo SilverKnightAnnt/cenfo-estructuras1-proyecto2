@@ -10,15 +10,9 @@
  *
  * Created on August 7, 2018, 8:01 PM
  */
-#include "Carta.h"
 #include "Campo.h"
 #include "Mano.h"
 #include "Jugador.h"
-#include "ListaCartas.h"
-#include "NodoTurno.h"
-#include "ColaTurnos.h"
-#include "Puntuacion.h"
-#include "ListaPuntuaciones.h"
 #include "Controlador.h"
 #include <cstdlib>
 #include <string>
