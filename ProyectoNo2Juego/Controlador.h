@@ -35,6 +35,8 @@ class Controlador {
 public:
     Controlador();
     virtual ~Controlador();
+    void setEnableSummon(bool pEnable);
+    bool getEnableSummon();
     Jugador* obtenerJ1();
     Jugador* obtenerJ2();
     void insertarJugador(Jugador* pJugador);
@@ -47,8 +49,15 @@ public:
     void initJ2(string aliasJ2, int vidaJ2);
     void generarBarajaJugador(Jugador* pJugador);
     void generarManoJugador(Jugador* pJugador);
-private:
+    void colocarCartaEnCampo(int idenCarta, int espacio);
+    string verDetalleCarta(int idenCarta, int pNumJugador);
+    void obtenerCarta();
+    int obtenerLongitudBarajaJ1();
+    void atacar(int pCartaAtacante, int pCartaAtacar);
 
+private:
+    Jugador* obtenerCampoJugador(int pNumJugador);
+    bool enableSummon = false;
 };
 
 #endif /* CONTROLADOR_H */

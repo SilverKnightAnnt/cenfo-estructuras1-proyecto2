@@ -39,11 +39,10 @@ void colocarCartaEnCampo();
 void verCampo();
 void verDetalleCarta();
 void terminarTurno();
-Jugador* mostrarCartasJugador();
 void declararGanador();
 void atacar();
 void limpiar();
-void obtenerCarta(Jugador*);
+void obtenerCarta();
 
 static Controlador controlador;
 
@@ -150,28 +149,15 @@ void verMano() {
 }
 
 void colocarCartaEnCampo() {
-    if (enableSummon == true) {
+    if (enableSummon) {
         verMano();
         int iden, espacio;
-        Carta c;
-        Campo cp;
-        Mano m;
         cout << "\nIngrese el identificador de la carta que desea invocar: ";
         cin >> iden;
-        c.setIdentificador(iden);
-        NodoCartas* cartaBuscar = controlador.obtenerJ1()->getMano().getListaCartas().buscarCartaPorIdentificador(c);
-        if (cartaBuscar != NULL) {
-            c = cartaBuscar->getCarta();
-            cout << "Digite el espacio al cual la quiere agregar (1-5): ";
-            cin >> espacio;
-            espacio--;
-            cp = controlador.obtenerJ1()->getCampo();
-            cp.colocarCarta(c, espacio);
-            controlador.obtenerJ1()->setCampo(cp);
-            m = controlador.obtenerJ1()->getMano();
-            m.eliminarCartaDeMano(c);
-            controlador.obtenerJ1()->setMano(m);
-        }
+        cout << "Digite el espacio al cual la quiere agregar (1-5): ";
+        cin >> espacio;
+        espacio--;
+        controlador.colocarCartaEnCampo(iden, espacio);
         enableSummon = false;
     }
 }
@@ -186,14 +172,15 @@ void verCampo() {
 
 void verDetalleCarta() {
     verCampo();
-    int iden;
-    Carta c;
-    Campo cmp = mostrarCartasJugador()->getCampo();
+    int iden, numJugador;
+    cout << "\n\n1. Ver el detalle de tus cartas"
+            "\n2. Ver el detalle de las cartas enemigas"
+            "\n\nSeleccione su opci\u00f3n: ";
+    cin >> numJugador;
     cout << "\nIngrese el identificador de la carta que desea ver: ";
     cin >> iden;
-    c.setIdentificador(iden);
     cout << "\n***********************************************************";
-    cout << cmp.verDetalleCarta(c).imprimirCarta();
+    cout << controlador.verDetalleCarta(iden, numJugador);
     cout << "\n***********************************************************";
 }
 
@@ -201,48 +188,20 @@ void terminarTurno() {
     cout << "\nTermino el turno del jugador "
             << controlador.obtenerJ1()->getAlias();
     controlador.terminarTurnoJugador();
-    obtenerCarta(controlador.obtenerJ1());
+    obtenerCarta();
     enableSummon = true;
     enableAtack = true;
     conteoTurnos++;
 }
 
-void obtenerCarta(Jugador* pJugador) {
-    if (pJugador->getBaraja().getPilaCartas().getLongitud() > 0) {
-        Baraja bara = pJugador->getBaraja();
-        Mano mano = pJugador->getMano();
-        PilaCartas mazo = bara.getPilaCartas();
-        ListaCartas lista = mano.getListaCartas();
-        NodoCartas* nodo = mazo.obtenerTope();
-        Carta car = nodo->getCarta();
-        lista.insertarCarta(car);
-        mano.setListaCartas(lista);
-        pJugador->setMano(mano);
-        bara.setPilaCartas(mazo);
-        pJugador->setBaraja(bara);
+void obtenerCarta() {
+    if (controlador.obtenerLongitudBarajaJ1() > 0) {
+        controlador.obtenerCarta();
     } else {
         cout << "\n\nGano el jugador " << controlador.obtenerJ2()->getAlias() << " por deck out.";
         controlador.insertarPuntajes(100, controlador.obtenerJ2()->getAlias());
-        //controlador.insertarPuntajes(100, controlador.obtenerJ2()->getAlias());
         gane = true;
     }
-}
-
-Jugador* mostrarCartasJugador() {
-    int opcion;
-    cout << "\n\n1. Ver el detalle de tus cartas"
-            "\n2. Ver el detalle de las cartas enemigas"
-            "\n\nSeleccione su opci\u00f3n: ";
-    cin >> opcion;
-
-    if (opcion == 1) {
-        return controlador.obtenerJ1();
-    } else if (opcion == 2) {
-        return controlador.obtenerJ2();
-    }
-
-    cout << "\nOpci\u00f3n incorrecta.";
-    return NULL;
 }
 
 void declararGanador() {
@@ -263,46 +222,12 @@ void declararGanador() {
 void atacar() {
     if (conteoTurnos != 1 && enableAtack == true) {
         int iden, iden2;
-        Carta cartaJ1, cartaJ2;
         verCampo();
         cout << "\n\nIngrese el identificador de la carta atacante: ";
         cin >> iden;
-        cartaJ1.setIdentificador(iden);
-        cartaJ1 = controlador.obtenerJ1()->getCampo().verDetalleCarta(cartaJ1);
         cout << "Ingrese el identificador de la carta a atacar: ";
         cin >> iden2;
-        cartaJ2.setIdentificador(iden2);
-        cartaJ2 = controlador.obtenerJ2()->getCampo().verDetalleCarta(cartaJ2);
-
-        if (cartaJ1.getAtaque() > cartaJ2.getDefensa()) {
-            int dif = cartaJ1.getAtaque() - cartaJ2.getDefensa();
-            controlador.obtenerJ2()->setVida((controlador.obtenerJ2()->getVida() - dif));
-            Campo campoJ2 = controlador.obtenerJ2()->getCampo();
-            campoJ2.eliminarCarta(cartaJ2);
-            controlador.obtenerJ2()->setCampo(campoJ2);
-            //controlador.insertarPuntajes(10, controlador.obtenerJ1()->getAlias());
-        }
-
-        if (cartaJ1.getAtaque() == cartaJ2.getDefensa()) {
-            Campo campoJ1 = controlador.obtenerJ1()->getCampo();
-            Campo campoJ2 = controlador.obtenerJ2()->getCampo();
-            campoJ1.eliminarCarta(cartaJ1);
-            campoJ2.eliminarCarta(cartaJ2);
-            controlador.obtenerJ1()->setCampo(campoJ1);
-            controlador.obtenerJ2()->setCampo(campoJ2);
-            //controlador.insertarPuntajes(10, controlador.obtenerJ1()->getAlias());
-            //controlador.insertarPuntajes(10, controlador.obtenerJ2()->getAlias());
-        }
-
-        if (cartaJ1.getAtaque() < cartaJ2.getDefensa()) {
-            int dif = cartaJ2.getDefensa() - cartaJ1.getAtaque();
-            controlador.obtenerJ1()->setVida((controlador.obtenerJ1()->getVida() - dif));
-            Campo campoJ1 = controlador.obtenerJ1()->getCampo();
-            campoJ1.eliminarCarta(cartaJ1);
-            controlador.obtenerJ1()->setCampo(campoJ1);
-            //controlador.insertarPuntajes(-15, controlador.obtenerJ1()->getAlias());
-        }
-
+        controlador.atacar(iden, iden2);
         enableAtack = false;
         declararGanador();
     }

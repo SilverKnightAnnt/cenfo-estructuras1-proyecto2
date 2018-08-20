@@ -25,6 +25,14 @@ Controlador::Controlador() {
 Controlador::~Controlador() {
 }
 
+void Controlador::setEnableSummon(bool pEnable) {
+    enableSummon = pEnable;
+}
+
+bool Controlador::getEnableSummon() {
+    return enableSummon;
+}
+
 Jugador* Controlador::obtenerJ1() {
     return turnos.getFrente()->getInfo();
 }
@@ -35,12 +43,12 @@ Jugador* Controlador::obtenerJ2() {
 
 void Controlador::reiniciarJuego() {
     ColaTurnos nuevosTurnos;
+    Baraja barajaJ1, barajaJ2;
+    Mano manoJ1, manoJ2;
+    Campo campoJ1, campoJ2;
+    J1 = Jugador("", 0, barajaJ1, manoJ1, campoJ1);
+    J2 = Jugador("", 0, barajaJ2, manoJ2, campoJ2);
     turnos = nuevosTurnos;
-    Baraja b;
-    Mano m;
-    Campo c;
-    J1 = Jugador("", 0, b, m, c);
-    J2 = Jugador("", 0, b, m, c);
 }
 
 string Controlador::mostrarJugadores() {
@@ -120,6 +128,95 @@ void Controlador::generarManoJugador(Jugador* pJugador) {
         pJugador->setMano(mano);
         bara.setPilaCartas(mazo);
         pJugador->setBaraja(bara);
+    }
+}
+
+void Controlador::colocarCartaEnCampo(int idenCarta, int espacio) {
+    Carta c;
+    Campo cp;
+    Mano m;
+    c.setIdentificador(idenCarta);
+    NodoCartas* cartaBuscar = obtenerJ1()->getMano().getListaCartas().buscarCartaPorIdentificador(c);
+
+    if (cartaBuscar != NULL) {
+        c = cartaBuscar->getCarta();
+        cp = obtenerJ1()->getCampo();
+        cp.colocarCarta(c, espacio);
+        obtenerJ1()->setCampo(cp);
+        m = obtenerJ1()->getMano();
+        m.eliminarCartaDeMano(c);
+        obtenerJ1()->setMano(m);
+    }
+
+}
+
+string Controlador::verDetalleCarta(int idenCarta, int pNumJugador) {
+    Carta c;
+    Campo cmp = obtenerCampoJugador(pNumJugador)->getCampo();
+    c.setIdentificador(idenCarta);
+    return cmp.verDetalleCarta(c).imprimirCarta();
+}
+
+Jugador* Controlador::obtenerCampoJugador(int pNumJugador) {
+    if (pNumJugador == 1) {
+        return obtenerJ1();
+    }
+
+    if (pNumJugador == 2) {
+        return obtenerJ2();
+    }
+
+    return NULL;
+}
+
+void Controlador::obtenerCarta() {
+    Baraja bara = obtenerJ1()->getBaraja();
+    Mano mano = obtenerJ1()->getMano();
+    PilaCartas mazo = bara.getPilaCartas();
+    ListaCartas lista = mano.getListaCartas();
+    NodoCartas* nodo = mazo.obtenerTope();
+    Carta car = nodo->getCarta();
+    lista.insertarCarta(car);
+    mano.setListaCartas(lista);
+    obtenerJ1()->setMano(mano);
+    bara.setPilaCartas(mazo);
+    obtenerJ1()->setBaraja(bara);
+}
+
+int Controlador::obtenerLongitudBarajaJ1() {
+    return obtenerJ1()->getBaraja().getPilaCartas().getLongitud();
+}
+
+void Controlador::atacar(int pCartaAtacante, int pCartaAtacar) {
+    Carta cartaJ1, cartaJ2;
+    cartaJ1.setIdentificador(pCartaAtacante);
+    cartaJ1 = obtenerJ1()->getCampo().verDetalleCarta(cartaJ1);
+    cartaJ2.setIdentificador(pCartaAtacar);
+    cartaJ2 = obtenerJ2()->getCampo().verDetalleCarta(cartaJ2);
+
+    if (cartaJ1.getAtaque() > cartaJ2.getDefensa()) {
+        int dif = cartaJ1.getAtaque() - cartaJ2.getDefensa();
+        obtenerJ2()->setVida((obtenerJ2()->getVida() - dif));
+        Campo campoJ2 = obtenerJ2()->getCampo();
+        campoJ2.eliminarCarta(cartaJ2);
+        obtenerJ2()->setCampo(campoJ2);
+    }
+
+    if (cartaJ1.getAtaque() == cartaJ2.getDefensa()) {
+        Campo campoJ1 = obtenerJ1()->getCampo();
+        Campo campoJ2 = obtenerJ2()->getCampo();
+        campoJ1.eliminarCarta(cartaJ1);
+        campoJ2.eliminarCarta(cartaJ2);
+        obtenerJ1()->setCampo(campoJ1);
+        obtenerJ2()->setCampo(campoJ2);
+    }
+
+    if (cartaJ1.getAtaque() < cartaJ2.getDefensa()) {
+        int dif = cartaJ2.getDefensa() - cartaJ1.getAtaque();
+        obtenerJ1()->setVida((obtenerJ1()->getVida() - dif));
+        Campo campoJ1 = obtenerJ1()->getCampo();
+        campoJ1.eliminarCarta(cartaJ1);
+        obtenerJ1()->setCampo(campoJ1);
     }
 }
 
