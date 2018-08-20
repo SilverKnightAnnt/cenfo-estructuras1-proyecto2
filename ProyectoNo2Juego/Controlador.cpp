@@ -23,14 +23,6 @@ Controlador::Controlador() {
 Controlador::~Controlador() {
 }
 
-void Controlador::setEnableSummon(bool pEnable) {
-    enableSummon = pEnable;
-}
-
-bool Controlador::getEnableSummon() {
-    return enableSummon;
-}
-
 Jugador* Controlador::obtenerJ1() {
     return turnos.getFrente()->getInfo();
 }
@@ -108,19 +100,19 @@ void Controlador::generarManoJugador(Jugador* pJugador) {
 }
 
 void Controlador::colocarCartaEnCampo(int idenCarta, int espacio) {
-    Carta c;
+    Carta cJ1;
+    cJ1.setIdentificador(idenCarta);
     Campo cp;
     Mano m;
-    c.setIdentificador(idenCarta);
-    NodoCartas* cartaBuscar = obtenerJ1()->getMano().getListaCartas().buscarCartaPorIdentificador(c);
+    NodoCartas* cartaBuscar = obtenerJ1()->getMano().getListaCartas().buscarCartaPorIdentificador(cJ1);
 
     if (cartaBuscar != NULL) {
-        c = cartaBuscar->getCarta();
+        cJ1 = cartaBuscar->getCarta();
         cp = obtenerJ1()->getCampo();
-        cp.colocarCarta(c, espacio);
+        cp.colocarCarta(cJ1, espacio);
         obtenerJ1()->setCampo(cp);
         m = obtenerJ1()->getMano();
-        m.eliminarCartaDeMano(c);
+        m.eliminarCartaDeMano(cJ1);
         obtenerJ1()->setMano(m);
     }
 
@@ -128,9 +120,9 @@ void Controlador::colocarCartaEnCampo(int idenCarta, int espacio) {
 
 string Controlador::verDetalleCarta(int idenCarta, int pNumJugador) {
     Carta c;
-    Campo cmp = obtenerCampoJugador(pNumJugador)->getCampo();
     c.setIdentificador(idenCarta);
-    return cmp.verDetalleCarta(c).imprimirCarta();
+    Campo campoActual = obtenerCampoJugador(pNumJugador)->getCampo();
+    return campoActual.verDetalleCarta(c).imprimirCarta();
 }
 
 Jugador* Controlador::obtenerCampoJugador(int pNumJugador) {
