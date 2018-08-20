@@ -25,15 +25,11 @@ public:
     virtual ~NodoPuntuacion();
     void setInfo(Puntuacion* newRecord);
     void setSiguiente(NodoPuntuacion*);
-    void setAnterior(NodoPuntuacion* pNuevo);
     Puntuacion* getInfo();
-    NodoPuntuacion* getSiguiente();
-    NodoPuntuacion* getAnterior();
-    
+    NodoPuntuacion* getSiguiente();   
 private:
     Puntuacion* record;
     NodoPuntuacion* siguiente;
-    NodoPuntuacion* anterior;
 };
 
 #endif /* NODOPUNTUACION_H */

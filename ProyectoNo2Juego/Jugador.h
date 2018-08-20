@@ -30,6 +30,7 @@ private:
     Campo campo;
 public:
     Jugador();
+    Jugador(string,int,Baraja,Mano,Campo);
     void setAlias(string);
     string getAlias();
     void setVida(int);

@@ -17,106 +17,93 @@
 
 ListaPuntuaciones::ListaPuntuaciones() {
     setInicio(NULL);
-    setUltimo(NULL);
 }
 
 ListaPuntuaciones::~ListaPuntuaciones() {
 }
 
-void ListaPuntuaciones::setInicio(NodoPuntuacion* pNuevoNodo) {
-    inicio = pNuevoNodo;
-}
-
-void ListaPuntuaciones::setUltimo(NodoPuntuacion* pNuevoNodo) {
-    ultimo = pNuevoNodo;
+void ListaPuntuaciones::setInicio(NodoPuntuacion* pNuevoNodoPuntuacion) {
+    inicio = pNuevoNodoPuntuacion;
 }
 
 NodoPuntuacion* ListaPuntuaciones::getInicio() {
     return inicio;
 }
 
-NodoPuntuacion* ListaPuntuaciones::getUltimo() {
-    return ultimo;
-}
-
 bool ListaPuntuaciones::esVacio() {
     return inicio == NULL;
 }
 
-void ListaPuntuaciones::insertarAlInicio(Puntuacion* pNewRecord) {
+void ListaPuntuaciones::insertarAlInicio(Puntuacion* pNewRecord) {    
     NodoPuntuacion* nuevo = new NodoPuntuacion(pNewRecord);
-
-    if (!esVacio()) {
-        nuevo->setAnterior(getUltimo());
-        getUltimo()->setSiguiente(nuevo);
+    if (esVacio()) {
+        setInicio(nuevo);
     } else {
+        nuevo->setSiguiente(getInicio());
         setInicio(nuevo);
     }
-
-    setUltimo(nuevo);
 }
 
 void ListaPuntuaciones::insertarOrdenado(Puntuacion* pNewRecord) {
-    if (esVacio()) {
+    if (getInicio() == NULL || pNewRecord->getPuntuacion() >= getInicio()->getInfo()->getPuntuacion()) {
         insertarAlInicio(pNewRecord);
     } else {
-        NodoPuntuacion* nuevo = new NodoPuntuacion(pNewRecord);
+        NodoPuntuacion* nuevoNodo = new NodoPuntuacion(pNewRecord);
+        NodoPuntuacion* aux = getInicio();
+        while (aux->getSiguiente() != NULL && aux->getSiguiente()->getInfo()->getPuntuacion() >= pNewRecord->getPuntuacion()) {
+            aux = aux->getSiguiente();
+        }
+        nuevoNodo->setSiguiente(aux->getSiguiente());
+        aux->setSiguiente(nuevoNodo);
+    }
+}
 
-        if (pNewRecord->getPuntuacion() < getInicio()->getInfo()->getPuntuacion()) {
-            getInicio()->setAnterior(nuevo);
-            nuevo->setSiguiente(getInicio());
-            setInicio(nuevo);
-        } else {
-            NodoPuntuacion* aux = getInicio();
-
-            while (aux != NULL) {
-
-                if (aux->getSiguiente() == NULL) {
-                    insertarAlInicio(pNewRecord);
-                    break;
-                }
-
-                if (aux->getInfo()->getPuntuacion() < pNewRecord->getPuntuacion() &&
-                        aux->getSiguiente()->getInfo()->getPuntuacion() > pNewRecord->getPuntuacion()) {
-                    nuevo->setAnterior(aux);
-                    nuevo->setSiguiente(aux->getSiguiente());
-                    aux->getSiguiente()->setAnterior(nuevo);
-                    aux->setSiguiente(nuevo);
-                    break;
-                }
-
+Puntuacion* ListaPuntuaciones::buscar(string pNombre) {  
+        NodoPuntuacion* aux = getInicio();
+        while (aux != NULL) {
+            if (aux->getInfo()->getNomJugador() == pNombre) {
+                return aux->getInfo();
+            } else {
                 aux = aux->getSiguiente();
             }
         }
-
-    }
-}
-
-Puntuacion* ListaPuntuaciones::buscar(string pNombre) {
-    NodoPuntuacion* aux = getUltimo();
-
-    while (aux != NULL) {
-        if (aux->getInfo()->getNomJugador() == pNombre) {
-            return aux->getInfo();
-        }
-        aux = aux->getAnterior();
-    }
-
-    return NULL;
+        return NULL;
 }
 
 string ListaPuntuaciones::mostrar() {
-    NodoPuntuacion* aux = getUltimo();
+    NodoPuntuacion* aux = getInicio();
     stringstream contenido;
     int cont = 0;
     contenido << "--------------------------------------- \n";
 
     while (aux != NULL) {
         contenido << ++cont << "- " << aux->getInfo()->toString() << "\n";
-        aux = aux->getAnterior();
+        aux = aux->getSiguiente();
     }
 
     contenido << "--------------------------------------- \n";
     return contenido.str();
+}
+
+bool ListaPuntuaciones::eliminar(string pNombre) {
+    if (esVacio()) {
+        return false;
+    } else {
+        if (getInicio()->getInfo()->getNomJugador() == pNombre) {
+            setInicio(getInicio()->getSiguiente());
+            return true;
+        } else {
+            NodoPuntuacion* aux = getInicio();
+            while (aux != NULL && aux->getSiguiente() != NULL && aux->getSiguiente()->getInfo()->getNomJugador() !=
+                    pNombre) {
+                aux = aux->getSiguiente();
+            }
+            if (aux != NULL && aux->getSiguiente() != NULL) {
+                aux->setSiguiente(aux->getSiguiente()->getSiguiente());
+                return true;
+            }
+        }
+    }
+    return false;
 }
 

@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/Campo.o \
 	${OBJECTDIR}/Carta.o \
 	${OBJECTDIR}/ColaTurnos.o \
+	${OBJECTDIR}/Controlador.o \
 	${OBJECTDIR}/Jugador.o \
 	${OBJECTDIR}/ListaCartas.o \
 	${OBJECTDIR}/ListaPuntuaciones.o \
@@ -94,6 +95,11 @@ ${OBJECTDIR}/ColaTurnos.o: ColaTurnos.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ColaTurnos.o ColaTurnos.cpp
+
+${OBJECTDIR}/Controlador.o: Controlador.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Controlador.o Controlador.cpp
 
 ${OBJECTDIR}/Jugador.o: Jugador.cpp
 	${MKDIR} -p ${OBJECTDIR}

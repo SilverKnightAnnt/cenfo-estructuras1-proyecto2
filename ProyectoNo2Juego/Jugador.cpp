@@ -11,6 +11,14 @@ Jugador::Jugador(){
     
 }
 
+Jugador::Jugador(string pAlias, int pVida, Baraja pBar, Mano pMano, Campo pCamp){
+    alias = pAlias;
+    vida = pVida;
+    baraja = pBar;
+    mano = pMano;
+    campo = pCamp;          
+}
+
 void Jugador::setAlias(string pAlias){
     alias = pAlias;
 }

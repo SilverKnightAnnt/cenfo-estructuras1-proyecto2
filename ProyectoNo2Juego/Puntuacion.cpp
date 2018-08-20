@@ -40,7 +40,7 @@ int Puntuacion::getPuntuacion(){
 string Puntuacion::toString(){
     stringstream contenido;
     contenido << "Nombre: " << getNomJugador()
-            << "Puntaje: " << getPuntuacion() << "\n";
+            << " Puntaje: " << getPuntuacion();
     return contenido.str();
 }
 

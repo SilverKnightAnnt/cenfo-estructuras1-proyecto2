@@ -16,13 +16,11 @@
 NodoPuntuacion::NodoPuntuacion() {
     setInfo(NULL);
     setSiguiente(NULL);
-    setAnterior(NULL);
 }
 
 NodoPuntuacion::NodoPuntuacion(Puntuacion* pNewRecord){
     setInfo(pNewRecord);
     setSiguiente(NULL);
-    setAnterior(NULL);
 }
 
 NodoPuntuacion::~NodoPuntuacion() {
@@ -36,9 +34,6 @@ void NodoPuntuacion::setSiguiente(NodoPuntuacion* nuevo){
     siguiente = nuevo;
 }
 
-void NodoPuntuacion::setAnterior(NodoPuntuacion* pNuevo){
-    anterior = pNuevo;
-}
 
 Puntuacion* NodoPuntuacion::getInfo(){
     return record;
@@ -47,8 +42,3 @@ Puntuacion* NodoPuntuacion::getInfo(){
 NodoPuntuacion* NodoPuntuacion::getSiguiente(){
     return siguiente;
 }
-
-NodoPuntuacion* NodoPuntuacion::getAnterior(){
-    return anterior;
-}
-

@@ -27,6 +27,7 @@ public:
     void colocarCarta(Carta,int);
     Carta verDetalleCarta(Carta);
     string imprimirCampo();
+    void eliminarCarta(Carta);
 };
 
 #endif /* CAMPO_H */

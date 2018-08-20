@@ -24,16 +24,14 @@ public:
     virtual ~ListaPuntuaciones();
     void setInicio(NodoPuntuacion* pNuevoNodo);
     NodoPuntuacion* getInicio();
-    void setUltimo(NodoPuntuacion* pNuevoNodo);
-    NodoPuntuacion* getUltimo();
     void insertarAlInicio(Puntuacion* pNewRecord);
     void insertarOrdenado(Puntuacion* pNewRecord);
     string mostrar();
     Puntuacion* buscar(string pNombre);
+    bool eliminar(string pNombre);
 private:
     bool esVacio();
     NodoPuntuacion* inicio;
-    NodoPuntuacion* ultimo;
 };
 
 #endif /* LISTAPUNTUACIONES_H */

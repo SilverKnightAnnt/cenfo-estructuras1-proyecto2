@@ -54,10 +54,10 @@ NodoCartas* PilaCartas::obtenerTope() {
         NodoCartas* aux = getTope();
         while (aux != NULL) {
             setTope(aux->getSiguiente());
+            longitud--;
             return aux;
         }
     }
-    longitud--;
 }
 
 string PilaCartas::verPilaCartas(){

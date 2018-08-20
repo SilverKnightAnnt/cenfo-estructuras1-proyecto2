@@ -31,6 +31,7 @@ public:
     void insertarCarta(Carta);
     string verListaCartas();
     NodoCartas* buscarCartaPorIdentificador(Carta);
+    void eliminarCarta(Carta);
 };
 
 #endif /* LISTACARTAS_H */
